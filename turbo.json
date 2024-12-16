@@ -6,6 +6,13 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
+    "web#dev": {
+      "cache": false
+    },
+    "web#build": {
+      "cache": false,
+      "outputs": ["dist/**", ".next/**"]
+    },
     "lint": {},
     "type-check": {},
     "dev": {
