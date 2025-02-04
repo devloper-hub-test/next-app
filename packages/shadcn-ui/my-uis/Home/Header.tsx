@@ -14,6 +14,7 @@ import Link from "next/link";
 import ShinyButton from "./../../components/ui/shiny-button";
 import DarkModeIcon from "../../Icons/DarkModeIcon";
 import LightModeIcon from "../../Icons/LightModeIcon";
+import PortFolioIcon from "../../Icons/PortFolioIcon";
 
 export default function Header() {
   // const slugs = [
@@ -111,9 +112,13 @@ export default function Header() {
     <section className="flex items-center justify-between border-b px-4 py-2 shadow-sm rounded-md">
       {/* <IconCloud iconSlugs={slugs} /> */}
       <div className="flex items-center">
-        <div className="w-[200px] flex items-center">
-          <div className="rounded-full px-4 py-2 text-white bg-blue-500">R</div>
-          <div className="py-2 pl-4 font-sans">Rahul</div>
+        <div className="flex items-center px-2 pr-4">
+          <div>
+            <PortFolioIcon width={35} height={35} />
+          </div>
+          <div className="py-2 font-dancing capitalize text-lg font-semibold italic text-black dark:text-[#4DB6AC]">
+            Rahul verma
+          </div>
         </div>
         <div>
           <NavigationMenu>

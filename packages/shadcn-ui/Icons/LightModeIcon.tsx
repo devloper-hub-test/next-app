@@ -1,8 +1,8 @@
 import * as React from "react";
 const LightModeIcon = (props: any) => (
   <svg
-    width="32px"
-    height="32px"
+    width="25px"
+    height="25px"
     viewBox="0 0 32 32"
     id="icon"
     xmlns="http://www.w3.org/2000/svg"

@@ -22,6 +22,9 @@ module.exports = {
       },
     },
     extend: {
+      fontFamily: {
+        dancing: ["Dancing Script", "cursive"],
+      },
       colors: {
         darkTheme: "bg-black",
         lightTheme: "bg-white",

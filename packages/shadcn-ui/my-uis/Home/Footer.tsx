@@ -34,7 +34,7 @@ export default function Footer() {
 
         {/* Copyright Section */}
         <p className="text-sm text-gray-400">
-          © 2024 Your Name. All Rights Reserved.
+          © 2024 Rahul verma. All Rights Reserved.
         </p>
       </div>
     </footer>
