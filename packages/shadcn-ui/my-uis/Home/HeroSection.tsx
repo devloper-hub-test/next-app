@@ -2,41 +2,36 @@
 import RetroGrid from "../../components/ui/retro-grid";
 import React from "react";
 import ShimmerButton from "../../components/ui/shimmer-button";
-import IconCloud from "../../components/ui/icon-cloud";
+import { IconCloud } from "../../components/magicui/icon-cloud";
 
 export default function HeroSection() {
   const slugs = [
     "typescript",
     "javascript",
-    // "dart",
     "java",
     "react",
-    // "flutter",
     "android",
     "html5",
     "css3",
     "nodedotjs",
     "express",
     "nextdotjs",
-    // "prisma",
     "amazonaws",
     "postgresql",
     "firebase",
-    "nginx",
     "vercel",
-    "testinglibrary",
-    "jest",
-    // "cypress",
     "docker",
     "git",
-    "jira",
     "github",
-    "gitlab",
     "visualstudiocode",
     "androidstudio",
-    // "sonarqube",
     "figma",
   ];
+
+  const images = slugs.map(
+    (slug) => `https://cdn.simpleicons.org/${slug}/${slug}`
+  );
+
   return (
     <div className="rounded-md px-4 relative">
       <RetroGrid className="" />
@@ -59,15 +54,8 @@ export default function HeroSection() {
           </div>
         </div>
         <div className="px-14 pb-14 pt-4">
-          {/* <Image
-            src="/HEROImage.webp"
-            alt="hero image"
-            height={100}
-            width={100}
-            className="w-full  object-cover rounded-xl shadow-2xl shadow-slate-500"
-          /> */}
           <div className="relative flex size-full max-w-lg items-center justify-center overflow-hidden rounded-lg bg-transparent dark:bg-white px-20 pb-20 pt-8 ">
-            <IconCloud iconSlugs={slugs} />
+            <IconCloud images={images} />
           </div>
         </div>
       </section>
