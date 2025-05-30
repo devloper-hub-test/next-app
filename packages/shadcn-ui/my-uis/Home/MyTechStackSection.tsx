@@ -20,11 +20,11 @@ export default function MyTechStackSection() {
   const div7Ref = useRef<HTMLDivElement>(null);
   return (
     <div className="">
-      <h4 className="text-center text-5xl">
+      <h4 className="text-center font-semibold text-lg lg:text-5xl">
         Crafting Android & iOS Experiences
       </h4>
-      <div className="grid grid-cols-2 mt-14 ">
-        <div className="pr-24 text-lg leading-8 tracking-wide capitalize break-word">
+      <div className="grid lg:grid-cols-2 lg:mt-14 gap-y-4">
+        <div className="order-2 lg:order-1 lg:pr-24 text-xs lg:text-lg leading-5 lg:leading-8 tracking-wide capitalize break-word text-center lg:text-left">
           {`As a developer proficient in React Native, I craft intuitive Android
           and iOS applications that deliver top-notch performance and user
           satisfaction. From ideation to deployment, I specialize in building
@@ -36,7 +36,7 @@ export default function MyTechStackSection() {
           className="relative flex w-full items-center justify-center overflow-hidden rounded-lg bg-background p-10"
           ref={containerRef}
         >
-          <div className="flex size-full flex-col max-w-lg max-h-[200px] items-stretch justify-between gap-10">
+          <div className="flex size-full flex-col max-w-lg max-h-[200px] items-stretch justify-between lg:gap-10">
             <div className="flex flex-row items-center justify-between">
               <Circle ref={div1Ref}>
                 <MySQLIcon />

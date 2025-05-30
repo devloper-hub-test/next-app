@@ -34,8 +34,10 @@ export default function Projects() {
   const secondRow = reviews.slice(reviews.length / 2);
   return (
     <section>
-      <div className="text-5xl text-center">Projects</div>
-      <div className="relative flex w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-background mt-12">
+      <div className="font-semibold text-3xl lg:text-5xl text-center">
+        Projects
+      </div>
+      <div className="relative flex w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-background mt-4 lg:mt-12">
         <Marquee pauseOnHover className="[--duration:60s]">
           {firstRow.map((review) => (
             <ReviewCard key={review?.name} {...review} />

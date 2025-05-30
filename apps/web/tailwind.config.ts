@@ -24,6 +24,7 @@ module.exports = {
     extend: {
       fontFamily: {
         dancing: ["Dancing Script", "cursive"],
+        openSans: ["Inter", ...defaultTheme.fontFamily.sans],
       },
       colors: {
         darkTheme: "bg-black",

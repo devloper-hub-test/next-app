@@ -1,6 +1,7 @@
 import * as React from "react";
-const AWSIcon = (props: any) => (
+const AWSIcon = ({ className = "", ...props }) => (
   <svg
+    className={className}
     width="800px"
     height="800px"
     viewBox="0 -30 150 150"

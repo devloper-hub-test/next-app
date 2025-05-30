@@ -2,8 +2,8 @@ import * as React from "react";
 const DarkModeIcon = (props: any) => (
   <svg
     fill="#fff"
-    width="25px"
-    height="25px"
+    width="22px"
+    height="22px"
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
     {...props}
