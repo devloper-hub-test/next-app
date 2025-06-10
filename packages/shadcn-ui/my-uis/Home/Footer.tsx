@@ -19,7 +19,7 @@ export default function Footer() {
           <Link href="https://twitter.com/yourhandle" target="_blank">
             Twitter
           </Link>
-          <Link href="https://medium.com/@yourhandle" target="_blank">
+          <Link href="/blog" target="_blank">
             Blog
           </Link>
         </div>
@@ -34,7 +34,7 @@ export default function Footer() {
 
         {/* Copyright Section */}
         <p className="text-sm text-gray-400">
-          © 2024 Rahul verma. All Rights Reserved.
+          © 2025 Rahul verma. All Rights Reserved.
         </p>
       </div>
     </footer>
