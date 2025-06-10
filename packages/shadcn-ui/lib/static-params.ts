@@ -1,5 +1,5 @@
-import { getPublishedPosts, getTags } from "shadcn-ui/lib/notion";
-import { isNotionPage } from "shadcn-ui/lib/notion-mappers";
+import { getPublishedPosts, getTags } from "./notion";
+import { isNotionPage } from "./notion-mappers";
 
 type StaticParam = { slug: string[] };
 const POSTS_PER_PAGE = 3;

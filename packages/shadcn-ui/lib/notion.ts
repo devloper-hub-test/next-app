@@ -8,7 +8,9 @@ import {
 } from "@notionhq/client/build/src/api-endpoints";
 import type { PageInfo, Tag } from "../types/notion";
 
-export const notion = new Client({ auth: process.env.NOTION_API_KEY });
+export const notion = new Client({
+  auth: `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`,
+});
 
 export const notionCustom = new NotionCompatAPI(notion);
 
