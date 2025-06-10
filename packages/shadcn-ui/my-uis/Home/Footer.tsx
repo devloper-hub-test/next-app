@@ -2,6 +2,7 @@ import Link from "next/link";
 import React from "react";
 
 export default function Footer() {
+  console.log("initial log");
   return (
     <footer className="dark:bg-gray-900 dark:text-white py-8">
       <div className="container mx-auto px-4 text-center">
