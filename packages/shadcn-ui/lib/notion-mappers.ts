@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { BlogPost, NotionPage, Tag } from "../types/notion";
 
 export function isNotionPage(page: any): page is NotionPage {

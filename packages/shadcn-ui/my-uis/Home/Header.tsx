@@ -36,14 +36,16 @@ export default function Header() {
       <section className="flex items-center justify-between border-b px-4 py-2 shadow-sm lg:py-4">
         {/* <IconCloud iconSlugs={slugs} /> */}
         <div className="flex items-center">
-          <div className="flex items-center px-2 pr-4">
-            <div>
-              <PortFolioIcon width={35} height={35} />
+          <Link href="/">
+            <div className="flex items-center px-2 pr-4">
+              <div>
+                <PortFolioIcon width={35} height={35} />
+              </div>
+              <p className="py-2 font-dancing capitalize text-xs sm:text-lg break-keep font-semibold italic text-black dark:text-[#4DB6AC]">
+                Rahul verma
+              </p>
             </div>
-            <p className="py-2 font-dancing capitalize text-xs sm:text-lg break-keep font-semibold italic text-black dark:text-[#4DB6AC]">
-              Rahul verma
-            </p>
-          </div>
+          </Link>
         </div>
         <div className="flex gap-x-4 items-center">
           <ShinyButton className="font-xs px-2 py-0 sm:py-2 sm:px-4 hidden md:inline-block">

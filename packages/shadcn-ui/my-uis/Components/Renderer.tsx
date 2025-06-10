@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 import { NotionRenderer } from "react-notion-x";
 import type { ComponentProps } from "react";
