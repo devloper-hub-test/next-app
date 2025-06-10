@@ -7,6 +7,18 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "types",
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "../../packages/shadcn-ui/lib/notion-mappers.ts",
+    "../../packages/shadcn-ui/lib/constants.ts",
+    "../../packages/shadcn-ui/lib/notion.ts",
+    "../../packages/shadcn-ui/lib/notion-utils.ts",
+    "../../packages/shadcn-ui/lib/page-utils.ts",
+    "../../packages/shadcn-ui/lib/static-params.ts"
+  ],
   "exclude": ["node_modules"]
 }

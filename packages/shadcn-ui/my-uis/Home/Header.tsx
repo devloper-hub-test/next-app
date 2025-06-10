@@ -4,9 +4,12 @@ import ShinyButton from "./../../components/ui/shiny-button";
 import DarkModeIcon from "../../Icons/DarkModeIcon";
 import LightModeIcon from "../../Icons/LightModeIcon";
 import PortFolioIcon from "../../Icons/PortFolioIcon";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     // Check for user preference in localStorage
@@ -43,9 +46,17 @@ export default function Header() {
           </div>
         </div>
         <div className="flex gap-x-4 items-center">
-          <ShinyButton className="font-xs px-2 py-0 sm:py-2 sm:px-4">
+          <ShinyButton className="font-xs px-2 py-0 sm:py-2 sm:px-4 hidden md:inline-block">
             <div className="text-[6px] sm:text-xs">Download Resume</div>
           </ShinyButton>
+          {pathname === "/" && (
+            <Link
+              href="/blog"
+              className="text-xs md:text-sm hover:underline underline-offset-4 capitalize font-sans lg:px-4 text-black dark:text-gray-200"
+            >
+              Blogs
+            </Link>
+          )}
           <div onClick={toggleDarkMode} className="w-12 flex cursor-pointer">
             {isDarkMode ? (
               <span className="bg-[#1e1e1e] p-1 rounded-full">
