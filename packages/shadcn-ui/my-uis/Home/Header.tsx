@@ -31,6 +31,7 @@ export default function Header() {
       setIsDarkMode(true);
     }
   };
+  console.log("logging sothing for test", pathname);
   return (
     <main className="fixed top-0 left-0 right-0 w-screen bg-white dark:bg-black z-50">
       <section className="flex items-center justify-between border-b px-4 py-2 shadow-sm lg:py-4">
