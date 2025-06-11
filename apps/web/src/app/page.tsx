@@ -7,6 +7,7 @@ import {
   Projects,
   Footer,
   AboutMe,
+  ChatBot,
 } from "shadcn-ui";
 
 export default function Page(): JSX.Element {
@@ -21,6 +22,7 @@ export default function Page(): JSX.Element {
           <MyTechStackSection />
           <Projects />
           <Footer />
+          <ChatBot />
         </main>
       </ThemeProvider>
     </div>
