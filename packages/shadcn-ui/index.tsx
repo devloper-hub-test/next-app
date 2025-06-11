@@ -6,4 +6,5 @@ export { default as MyTechStackSection } from "./my-uis/Home/MyTechStackSection"
 export { default as Projects } from "./my-uis/Home/Projects";
 export { default as Footer } from "./my-uis/Home/Footer";
 export { default as AboutMe } from "./my-uis/Home/AboutMe";
+export { default as TicTacToe } from "./OnlineTicTacToe/index";
 export { ThemeProvider, useThemeProvider } from "./my-uis/Home/ThemeProvider";

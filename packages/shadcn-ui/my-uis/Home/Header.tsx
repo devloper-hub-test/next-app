@@ -49,9 +49,14 @@ export default function Header() {
           </Link>
         </div>
         <div className="flex gap-x-4 items-center">
-          <ShinyButton className="font-xs px-2 py-0 sm:py-2 sm:px-4 hidden md:inline-block">
-            <div className="text-[6px] sm:text-xs">Download Resume</div>
-          </ShinyButton>
+          <a
+            target="_blank"
+            href="https://drive.google.com/uc?export=download&id=1A1JviBdnVaqHOLs58CbxvMPQD7eS8FbF"
+          >
+            <ShinyButton className="font-xs px-2 py-0 sm:py-2 sm:px-4 hidden md:inline-block">
+              <div className="text-[6px] sm:text-xs">Download Resume</div>
+            </ShinyButton>
+          </a>
           {pathname === "/" && (
             <Link
               href="/blog"
