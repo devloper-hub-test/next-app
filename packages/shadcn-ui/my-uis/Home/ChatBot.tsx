@@ -51,28 +51,30 @@ export default function ChatBot() {
     <div className="">
       <RightDrawer
         openText="ChatBot"
-        title="Rahul the Bot"
-        description="Chat with the bot for questions or help"
+        title="Chat with AI"
+        description="Your personal AI support, just a message away."
       >
-        <div className="py-4 flex flex-col h-full myDiv">
-          <ScrollArea className="flex-1 overflow-y-auto px-2 space-y-4">
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`mydiv text-sm py-2 px-4 rounded-lg max-w-[80%] whitespace-pre-wrap ${
-                  msg.sender === "user"
-                    ? "ml-auto bg-blue-600 text-white dark:bg-blue-500"
-                    : "mr-auto bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
-                }`}
-              >
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeHighlight]}
+        <div className="py-4 space-y-6 flex flex-col h-full">
+          <ScrollArea className="flex-1 overflow-y-auto px-2">
+            <div className="flex flex-col space-y-4">
+              {messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`mydiv text-sm py-2 px-4 rounded-lg max-w-[80%] whitespace-pre-wrap ${
+                    msg.sender === "user"
+                      ? "ml-auto bg-blue-600 text-white dark:bg-blue-500"
+                      : "mr-auto bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
+                  }`}
                 >
-                  {msg.text}
-                </ReactMarkdown>
-              </div>
-            ))}
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeHighlight]}
+                  >
+                    {msg.text}
+                  </ReactMarkdown>
+                </div>
+              ))}
+            </div>
           </ScrollArea>
 
           <div className="flex gap-2 items-center w-full mt-4 px-2">
