@@ -8,4 +8,5 @@ export { default as Footer } from "./my-uis/Home/Footer";
 export { default as AboutMe } from "./my-uis/Home/AboutMe";
 export { default as TicTacToe } from "./OnlineTicTacToe/index";
 export { default as ChatBot } from "./my-uis/Home/ChatBot";
+export { default as JokePopup } from "./my-uis/Home/JokePopup";
 export { ThemeProvider, useThemeProvider } from "./my-uis/Home/ThemeProvider";

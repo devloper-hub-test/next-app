@@ -1,106 +1,92 @@
-import Marquee from "../../components/ui/marquee";
+"use client";
+import { Card, CardContent } from "../../components/ui/card";
 import React from "react";
 
+import Lottie from "lottie-react";
+import AnimationAuction from "../Lottiefiles/AnimationAuction.json";
+import AnimationFinTech from "../Lottiefiles/AnimationFinTech.json";
+import Link from "next/link";
 export default function Projects() {
   const reviews = [
     {
-      name: "FinCase page",
+      name: "FinCase",
       body: "FinCase focuses on providing tailored financial solutions to optimize investment management and streamline loan accessibility. While specific details are scarce, it positions itself as a comprehensive platform for managing loans and financial products.",
-      img: "https://avatar.vercel.sh/jack",
+      lottieData: AnimationFinTech,
     },
     {
-      name: "FinEzzy page",
+      name: "FinEzzy",
       body: "FinEzzy is a fintech platform offering Loans Against Mutual Funds (LAMF). It allows users to unlock liquidity from their mutual fund investments, ensuring quick and hassle-free access to funds. By bridging the gap between traditional loans and financial flexibility, FinEzzy caters to individuals seeking to leverage their existing investments without liquidation.",
-      img: "https://avatar.vercel.sh/jack",
+      lottieData: AnimationFinTech,
     },
     {
-      name: "Auction bazaar page",
+      name: "Auction bazaar",
       body: "Auction Bazaar is an online marketplace offering auction-based solutions where users can explore and participate in real-time auctions for various financial or digital assets. It provides transparency and accessibility for individuals and businesses looking to buy or sell via competitive bidding.",
-      img: "https://avatar.vercel.sh/jack",
+      lottieData: AnimationAuction,
     },
-
-    // {
-    //   name: "Jill",
-    //   body: "I don't know what to say. I'm speechless. This is amazing.",
-    //   img: "https://avatar.vercel.sh/jill",
-    // },
-    // {
-    //   name: "John",
-    //   body: "I'm at a loss for words. This is amazing. I love it.",
-    //   img: "https://avatar.vercel.sh/john",
-    // },
+    {
+      name: "Auction bazaar",
+      body: "Auction Bazaar is an online marketplace offering auction-based solutions where users can explore and participate in real-time auctions for various financial or digital assets. It provides transparency and accessibility for individuals and businesses looking to buy or sell via competitive bidding.",
+      lottieData: AnimationAuction,
+    },
   ];
-  const firstRow = reviews.slice(0, reviews.length / 2);
-  const secondRow = reviews.slice(reviews.length / 2);
   return (
-    <section>
-      <div className="font-semibold text-3xl lg:text-5xl text-center">
-        Projects
+    <section className="py-10">
+      <div className="flex justify-center items-center">
+        <div className="w-full font-semibold text-3xl lg:text-5xl text-center mb-6">
+          Projects
+        </div>
+        <Link
+          href={"/projects"}
+          className="break-keep w-24 flex items-center justify-center text-xs lg:text-sm text-black dark:text-white cursor-pointer font-semibold capitalize"
+        >
+          View all
+        </Link>
       </div>
-      <div className="relative flex w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-background mt-4 lg:mt-12">
-        <Marquee pauseOnHover className="[--duration:60s]">
-          {firstRow.map((review) => (
-            <ReviewCard key={review?.name} {...review} />
+      <div className="mt-6 lg:mt-12">
+        <div className="p-1 w-full grid sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-2 lg:gap-y-6 justify-center">
+          {reviews.map((d, index) => (
+            <div key={index} className="max-w-[380px] lg:max-w-[400px]">
+              <ProjectCard
+                title={d.name}
+                description={d.body}
+                lottieData={d.lottieData}
+                link="/"
+              />
+            </div>
           ))}
-        </Marquee>
-        <Marquee reverse pauseOnHover className="[--duration:60s]">
-          {secondRow.map((review) => (
-            <ReviewCard key={review?.name} {...review} />
-          ))}
-        </Marquee>
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-white dark:from-background"></div>
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-white dark:from-background"></div>
+        </div>
       </div>
     </section>
   );
 }
+interface ProjectCardProps {
+  title: string;
+  description: string;
+  lottieData: object;
+  link: string;
+}
 
-const ReviewCard = ({
-  img,
-  showImg = false,
-  name,
-  username,
-  body,
-}: {
-  img?: string;
-  showImg?: boolean;
-  name?: string;
-  username?: string;
-  body?: string;
+const ProjectCard: React.FC<ProjectCardProps> = ({
+  title,
+  description,
+  lottieData,
+  link,
 }) => {
   return (
-    <div>
-      <figure
-        className={
-          "relative w-96 h-full cursor-pointer overflow-hidden rounded-xl border p-4 border-gray-950/[.1] bg-gray-950/[.01] hover:bg-gray-950/[.05] dark:border-gray-50/[.1] dark:bg-gray-50/[.10] dark:hover:bg-gray-50/[.15]"
-        }
-      >
-        <div className="flex flex-row items-center gap-2">
-          {showImg && (
-            <img
-              className="rounded-full"
-              width="32"
-              height="32"
-              alt=""
-              src={img}
-            />
-          )}
-          <div className="w-9 h-9 rounded-full bg-[#494191] text-white uppercase text-center flex justify-center items-center">
-            {name?.split("")[0]}
+    <Link href={link} target="_blank" rel="noopener noreferrer">
+      <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow cursor-pointer rounded-3xl  bg-white dark:bg-gray-900">
+        <CardContent className="py-6 lg:py-12 px-4 lg:px-6 flex flex-col items-center gap-4">
+          <div className="text-center flex flex-col">
+            <h3 className="text-xl font-semibold mb-1">{title}</h3>
+            <div className="flex justify-center max-h-[240px]">
+              <Lottie animationData={lottieData} loop autoplay />
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              {description}
+            </p>
           </div>
-          <div className="flex flex-col">
-            <figcaption className="text-sm font-medium dark:text-white">
-              {name}
-            </figcaption>
-          </div>
-        </div>
-        {username && (
-          <p className="text-xs font-medium mt-2 dark:text-white/40">
-            {username}
-          </p>
-        )}
-        <blockquote className="mt-2 text-sm">{body}</blockquote>
-      </figure>
-    </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 };

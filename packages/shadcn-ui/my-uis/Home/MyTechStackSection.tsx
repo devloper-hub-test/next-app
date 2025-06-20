@@ -19,7 +19,7 @@ export default function MyTechStackSection() {
   const div6Ref = useRef<HTMLDivElement>(null);
   const div7Ref = useRef<HTMLDivElement>(null);
   return (
-    <div className="">
+    <div className="bg-white dark:bg-gray-900 py-8">
       <h4 className="text-center font-semibold text-lg lg:text-5xl">
         Crafting Android & iOS Experiences
       </h4>
@@ -33,7 +33,7 @@ export default function MyTechStackSection() {
           together!`}
         </div>
         <div
-          className="relative flex w-full items-center justify-center overflow-hidden rounded-lg bg-background p-10"
+          className="relative flex w-full items-center justify-center overflow-hidden rounded-lg bg-white dark:bg-gray-900 p-10"
           ref={containerRef}
         >
           <div className="flex size-full flex-col max-w-lg max-h-[200px] items-stretch justify-between lg:gap-10">

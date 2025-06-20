@@ -8,7 +8,7 @@ export default function AboutMe() {
       <h4 className="text-center font-semibold text-2xl lg:text-5xl">
         About Me
       </h4>
-      <div className="grid  grid-cols-1 lg:grid-cols-2 flex-wrap gap-x-14 gap-y-4 lg:gap-y-10 my-4 lg:my-14">
+      <div className="grid grid-cols-1 lg:grid-cols-2 flex-wrap gap-x-14 gap-y-4 lg:gap-y-10 my-4 lg:my-14">
         <div className="lg:col-span-2">
           <TypingAnimation
             duration={5}
