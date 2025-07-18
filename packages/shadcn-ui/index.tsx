@@ -9,4 +9,5 @@ export { default as AboutMe } from "./my-uis/Home/AboutMe";
 export { default as TicTacToe } from "./OnlineTicTacToe/index";
 export { default as ChatBot } from "./my-uis/Home/ChatBot";
 export { default as JokePopup } from "./my-uis/Home/JokePopup";
+export { default as SnakeGame } from "./my-uis/SnakeGame/SnakeGameMain";
 export { ThemeProvider, useThemeProvider } from "./my-uis/Home/ThemeProvider";
