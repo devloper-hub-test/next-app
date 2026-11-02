@@ -4,12 +4,13 @@ import { Client } from "@notionhq/client";
 import { NotionCompatAPI } from "notion-compat";
 import {
   PageObjectResponse,
+  QueryDatabaseResponse,
   RichTextItemResponse,
 } from "@notionhq/client/build/src/api-endpoints";
 import type { PageInfo, Tag } from "../types/notion";
 
 export const notion = new Client({
-  auth: `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`,
+  auth: process.env.NOTION_TOKEN,
 });
 
 export const notionCustom = new NotionCompatAPI(notion);
@@ -84,7 +85,10 @@ export async function getPublishedPosts() {
   });
 }
 
-export async function getPageBySlug(slug: string) {
+// Resolves to undefined when no post has this slug
+export async function getPageBySlug(
+  slug: string
+): Promise<QueryDatabaseResponse["results"][number] | undefined> {
   const response = await notion.databases.query({
     database_id: "20d8acd0d5d780268883c4bb4b2d9e6b",
     filter: {

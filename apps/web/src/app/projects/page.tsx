@@ -1,7 +1,7 @@
 import React from "react";
 import { Header } from "shadcn-ui";
 
-export default function Projects() {
+export default function Projects(): JSX.Element {
   return (
     <div>
       <Header />

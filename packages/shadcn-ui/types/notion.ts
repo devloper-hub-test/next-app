@@ -78,7 +78,9 @@ export interface BlogListProps {
   pageParams: { slug?: string[] };
   isPaginated: boolean;
   heading?: string;
+  description?: string;
   basePath?: string;
+  activeTag?: string;
 }
 
 export interface BlogPostProps {
@@ -100,6 +102,8 @@ export interface PostListProps {
   basePath?: string;
   disablePagination?: boolean;
   configuration?: BlogConfiguration;
+  tags?: Tag[];
+  activeTag?: string;
 }
 
 export interface TableOfContentsProps {

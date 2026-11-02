@@ -32,7 +32,7 @@ export default function RightDrawer({
       <SheetTrigger asChild>
         <Button
           variant="outline"
-          className="fixed bottom-4 right-8 z-50 flex items-center gap-2 rounded-full font-mono px-4 lg:px-8 py-2 lg:py-6 border border-gray-300 dark:border-gray-600 bg-white text-black dark:bg-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 shadow-md transition-colors"
+          className="fixed bottom-4 right-4 sm:right-8 z-40 flex items-center gap-2 rounded-full font-mono px-4 lg:px-8 py-2 lg:py-6 border border-gray-300 dark:border-gray-600 bg-white text-black dark:bg-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 shadow-md transition-colors"
         >
           <svg
             width="20"
@@ -49,7 +49,7 @@ export default function RightDrawer({
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="w-full sm:w-3/4 sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl max-h-screen overflow-y-auto py-4 bg-white dark:bg-black"
+        className="flex h-full w-full flex-col py-4 sm:max-w-md md:max-w-lg bg-white dark:bg-black"
       >
         <SheetHeader>
           <SheetTitle className="text-center">{title}</SheetTitle>
@@ -60,7 +60,7 @@ export default function RightDrawer({
           )}
         </SheetHeader>
 
-        <div className="mt-4">{children}</div>
+        <div className="mt-4 flex min-h-0 flex-1 flex-col">{children}</div>
 
         {footerComponent && <SheetFooter>{footerComponent}</SheetFooter>}
       </SheetContent>

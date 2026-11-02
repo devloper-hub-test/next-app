@@ -12,18 +12,29 @@ import {
 
 export default function Page(): JSX.Element {
   return (
-    <div className="bg-white dark:bg-black">
+    <div className="min-h-screen bg-white text-gray-800 dark:bg-black dark:text-gray-200">
       <ThemeProvider>
-        <main className="max-w-7xl w-full py-4 px-2 mx-auto grid grid-cols-1 gap-y-4 lg:gap-y-24">
-          <Header />
+        {/* Fixed header and floating chat button live outside the content grid */}
+        <Header />
+        <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-24 lg:pt-28 pb-24 flex flex-col gap-y-16 lg:gap-y-28">
           <HeroSection />
-          <AboutMe />
-          <MyWorkSection />
-          <MyTechStackSection />
-          <Projects />
-          <Footer />
-          <ChatBot />
+          <section id="about" className="scroll-mt-24">
+            <AboutMe />
+          </section>
+          <section id="work" className="scroll-mt-24">
+            <MyWorkSection />
+          </section>
+          <section id="mobile" className="scroll-mt-24">
+            <MyTechStackSection />
+          </section>
+          <section id="projects" className="scroll-mt-24">
+            <Projects />
+          </section>
         </main>
+        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+          <Footer />
+        </div>
+        <ChatBot />
       </ThemeProvider>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 import { Header } from "shadcn-ui";
 
-export default function OnlineTicTacToePage() {
+export default function OnlineTicTacToePage(): JSX.Element {
   return (
     <>
       <Header />
