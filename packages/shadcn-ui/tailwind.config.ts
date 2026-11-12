@@ -9,6 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Site accent colour (teal by default); customizable via the --brand variables
+        brand: {
+          DEFAULT: "hsl(var(--brand) / <alpha-value>)",
+          strong: "hsl(var(--brand-strong) / <alpha-value>)",
+        },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {

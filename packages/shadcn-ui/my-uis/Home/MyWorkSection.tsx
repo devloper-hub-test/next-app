@@ -10,6 +10,7 @@ import BlurFade from "../../components/ui/blur-fade";
 import AndroidIcon from "../../Icons/AndroidIcon";
 import GitHubIcon from "../../Icons/GitHubIcon";
 import SectionHeading from "./SectionHeading";
+import { CustomText } from "../../customizer/CustomText";
 import BrandIcon from "./BrandIcon";
 
 interface OrbitItem {
@@ -81,7 +82,7 @@ function TechOrbit() {
         className="relative shrink-0 scale-[0.58] sm:scale-[0.78] lg:scale-100"
         style={{ width: ORBIT_SIZE, height: ORBIT_SIZE }}
       >
-        <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(77,182,172,0.18)_0%,transparent_65%)]" />
+        <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle,hsl(var(--brand)/0.18)_0%,transparent_65%)]" />
 
         <svg className="pointer-events-none absolute inset-0 size-full" aria-hidden>
           {RINGS.map((ring) => (
@@ -99,10 +100,10 @@ function TechOrbit() {
 
         <div
           title="Full Stack"
-          className="absolute left-1/2 top-1/2 flex size-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#4DB6AC]/40 bg-white shadow-[0_0_24px_rgba(77,182,172,0.35)] dark:bg-neutral-950"
+          className="absolute left-1/2 top-1/2 flex size-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-brand/40 bg-white shadow-[0_0_24px_hsl(var(--brand)/0.35)] dark:bg-neutral-950"
         >
-          <span className="absolute inset-0 animate-ping rounded-full border border-[#4DB6AC]/30 [animation-duration:3s]" />
-          <span className="font-mono text-base font-bold text-[#4DB6AC]">&lt;/&gt;</span>
+          <span className="absolute inset-0 animate-ping rounded-full border border-brand/30 [animation-duration:3s]" />
+          <span className="font-mono text-base font-bold text-brand">&lt;/&gt;</span>
         </div>
 
         {RINGS.map((ring) =>
@@ -134,26 +135,23 @@ function TechOrbit() {
 
 export default function MyWorkSection() {
   return (
+    <div data-section="work">
     <BlurFade delay={0.3} inView>
-      <SectionHeading>My Work</SectionHeading>
+      <SectionHeading textId="work.heading" />
       <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2">
         <BlurFade delay={0.35} inView>
           <TechOrbit />
         </BlurFade>
         <BlurFade delay={0.4} inView>
-          <p className="text-center text-sm leading-relaxed text-gray-600 dark:text-gray-300 lg:pr-12 lg:text-left lg:text-lg lg:leading-8">
-            I excel in crafting scalable, user-focused applications using
-            cutting-edge technologies. With extensive experience in Node.js,
-            React, and React Native, I have developed web and mobile solutions
-            that emphasize both performance and functionality. By utilizing
-            Tailwind CSS, I design responsive and visually captivating
-            interfaces, ensuring a seamless user experience across platforms. My
-            projects demonstrate proficiency in modern tools and frameworks,
-            highlighting expertise in both frontend and backend development for
-            robust, end-to-end solutions.
-          </p>
+          <CustomText
+            as="p"
+            className="block text-center text-sm leading-relaxed text-gray-600 dark:text-gray-300 lg:pr-12 lg:text-left lg:text-lg lg:leading-8"
+            id="work.body"
+            role="text"
+          />
         </BlurFade>
       </div>
     </BlurFade>
+    </div>
   );
 }

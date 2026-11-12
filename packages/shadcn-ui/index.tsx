@@ -13,3 +13,7 @@ export { default as SnakeGame } from "./my-uis/SnakeGame/SnakeGameMain";
 export { ThemeProvider, useThemeProvider } from "./my-uis/Home/ThemeProvider";
 export { default as KeyQuest } from "./my-uis/KeyQuest/KeyQuestMain";
 export { default as ChessGame } from "./my-uis/Chess/ChessMain";
+export { CustomizerProvider, useCustomizer } from "./customizer/CustomizerProvider";
+export { CustomizeDashboard } from "./customizer/CustomizeDashboard";
+export { CustomText } from "./customizer/CustomText";
+export { PREPAINT_SCRIPT } from "./customizer/prepaint";

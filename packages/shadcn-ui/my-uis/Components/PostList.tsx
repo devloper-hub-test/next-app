@@ -30,7 +30,7 @@ export function PostList({
   return (
     <div className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
       <section className="mb-10 text-center lg:mb-14">
-        <span className="inline-block rounded-full border border-[#4DB6AC]/40 bg-[#4DB6AC]/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[#2f8f86] dark:text-[#4DB6AC]">
+        <span className="inline-block rounded-full border border-brand/40 bg-brand/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-strong dark:text-brand">
           Blog
         </span>
         <h1 className="mt-4 text-3xl font-bold tracking-tight text-black sm:text-4xl lg:text-5xl dark:text-white">
@@ -68,7 +68,7 @@ export function PostList({
           <p className="text-gray-600 dark:text-gray-400">No posts here yet.</p>
           <Link
             href="/blog"
-            className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[#2f8f86] hover:underline dark:text-[#4DB6AC]"
+            className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-strong hover:underline dark:text-brand"
           >
             Browse all posts <ArrowRight className="size-4" />
           </Link>
@@ -120,7 +120,7 @@ function TagChip({
       className={cn(
         "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors sm:text-sm",
         active
-          ? "border-black bg-black text-white dark:border-[#4DB6AC] dark:bg-[#4DB6AC] dark:text-black"
+          ? "border-black bg-black text-white dark:border-brand dark:bg-brand dark:text-black"
           : "border-gray-200 text-gray-600 hover:border-gray-400 hover:text-black dark:border-white/10 dark:text-gray-300 dark:hover:border-white/30 dark:hover:text-white",
       )}
     >
@@ -147,7 +147,7 @@ function PostTags({ tags }: { tags: string[] }) {
       {tags.map((tag) => (
         <span
           key={tag}
-          className="rounded-full bg-[#4DB6AC]/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[#2f8f86] dark:text-[#4DB6AC]"
+          className="rounded-full bg-brand/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-brand-strong dark:text-brand"
         >
           {tag}
         </span>

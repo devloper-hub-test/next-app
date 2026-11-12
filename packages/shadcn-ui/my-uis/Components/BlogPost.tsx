@@ -133,7 +133,7 @@ export function BlogPost({ recordMap }: BlogPostProps) {
               <Link
                 key={tag.id}
                 href={`/blog/tag/${tag.value}`}
-                className="rounded-full bg-[#4DB6AC]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#2f8f86] transition-colors hover:bg-[#4DB6AC]/20 dark:text-[#4DB6AC]"
+                className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-strong transition-colors hover:bg-brand/20 dark:text-brand"
               >
                 {tag.label}
               </Link>
@@ -192,7 +192,7 @@ export function BlogPost({ recordMap }: BlogPostProps) {
                         "-ml-px block border-l-2 py-1 pl-3 transition-colors",
                         item.depth > 0 && "pl-6",
                         activeId === item.id
-                          ? "border-[#4DB6AC] font-medium text-black dark:text-white"
+                          ? "border-brand font-medium text-black dark:text-white"
                           : "border-transparent text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white",
                       )}
                     >

@@ -12,7 +12,7 @@ import {
 
 export default function Page(): JSX.Element {
   return (
-    <div className="min-h-screen bg-white text-gray-800 dark:bg-black dark:text-gray-200">
+    <div className="min-h-screen bg-background text-gray-800 dark:text-gray-200">
       <ThemeProvider>
         {/* Fixed header and floating chat button live outside the content grid */}
         <Header />

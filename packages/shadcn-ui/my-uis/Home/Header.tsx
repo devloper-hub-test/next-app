@@ -5,17 +5,19 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Download, Menu, Moon, Sun, X } from "lucide-react";
 import PortFolioIcon from "../../Icons/PortFolioIcon";
+import { CustomText } from "../../customizer/CustomText";
+import type { TextId } from "../../customizer/schema";
 
 const RESUME_URL =
   "https://drive.google.com/uc?export=download&id=1A1JviBdnVaqHOLs58CbxvMPQD7eS8FbF";
 
-const NAV_LINKS = [
-  { href: "/#about", label: "About", section: "about" },
-  { href: "/#work", label: "Work", section: "work" },
-  { href: "/#projects", label: "Projects", section: "projects" },
-  { href: "/blog", label: "Blog" },
-  { href: "/games", label: "Games" },
-  { href: "/learn", label: "Learn" },
+const NAV_LINKS: { href: string; textId: TextId; section?: string }[] = [
+  { href: "/#about", textId: "header.nav.about", section: "about" },
+  { href: "/#work", textId: "header.nav.work", section: "work" },
+  { href: "/#projects", textId: "header.nav.projects", section: "projects" },
+  { href: "/blog", textId: "header.nav.blog" },
+  { href: "/games", textId: "header.nav.games" },
+  { href: "/learn", textId: "header.nav.learn" },
 ];
 
 export default function Header() {
@@ -79,18 +81,21 @@ export default function Header() {
             ? "border-gray-200/80 bg-white/75 shadow-lg shadow-black/5 backdrop-blur-xl dark:border-white/10 dark:bg-neutral-950/70 dark:shadow-black/40"
             : "border-transparent bg-transparent"
         }`}
+        data-section="header"
       >
         <nav className="flex h-14 items-center justify-between px-3 sm:px-4">
           <Link
             href="/"
-            className="group flex items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4DB6AC]"
+            className="group flex items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >
             <span className="transition-transform duration-300 group-hover:rotate-12">
               <PortFolioIcon width={32} height={32} />
             </span>
-            <span className="font-dancing whitespace-nowrap text-lg font-semibold italic text-black sm:text-xl dark:text-[#4DB6AC]">
-              Rahul Verma
-            </span>
+            <CustomText
+              id="header.name"
+              className="font-dancing whitespace-nowrap text-lg font-semibold italic text-black sm:text-xl dark:text-brand"
+              role="heading"
+            />
           </Link>
 
           <ul className="hidden items-center gap-1 rounded-full border border-gray-200/80 bg-gray-50/80 p-1 md:flex dark:border-white/10 dark:bg-white/5">
@@ -112,8 +117,9 @@ export default function Header() {
                         ? "text-black dark:text-white"
                         : "text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
                     }`}
+                    data-role="text"
                   >
-                    {link.label}
+                    <CustomText id={link.textId} />
                   </Link>
                 </li>
               );
@@ -125,10 +131,11 @@ export default function Header() {
               href={RESUME_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden items-center gap-1.5 rounded-full bg-black px-4 py-2 text-xs font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-md sm:inline-flex dark:bg-[#4DB6AC] dark:text-black"
+              className="hidden items-center gap-1.5 rounded-full bg-black px-4 py-2 text-xs font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-md sm:inline-flex dark:bg-brand dark:text-black"
+              data-role="accent-bg"
             >
               <Download className="h-3.5 w-3.5" />
-              Resume
+              <CustomText id="header.resume" />
             </a>
 
             <button
@@ -187,7 +194,7 @@ export default function Header() {
                           : "text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5"
                       }`}
                     >
-                      {link.label}
+                      <CustomText id={link.textId} />
                     </Link>
                   </li>
                 ))}
@@ -196,7 +203,7 @@ export default function Header() {
                     href={RESUME_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 rounded-xl bg-black px-3 py-2.5 text-sm font-semibold text-white dark:bg-[#4DB6AC] dark:text-black"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-black px-3 py-2.5 text-sm font-semibold text-white dark:bg-brand dark:text-black"
                   >
                     <Download className="h-4 w-4" />
                     Download Resume

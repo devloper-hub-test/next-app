@@ -4,6 +4,7 @@ import React, { forwardRef, ReactNode, RefObject, createRef, useRef } from "reac
 import ReactIcon from "../../Icons/ReactIcon";
 import AndroidIcon from "../../Icons/AndroidIcon";
 import SectionHeading from "./SectionHeading";
+import { CustomText } from "../../customizer/CustomText";
 import BrandIcon from "./BrandIcon";
 
 interface Node {
@@ -25,7 +26,7 @@ const PLATFORMS: Node[] = [
 ];
 
 const BEAM_COLORS = {
-  gradientStartColor: "#4DB6AC",
+  gradientStartColor: "#4DB6AC", // SVG attribute: CSS variables are not supported here
   gradientStopColor: "#3b82f6",
   pathOpacity: 0.15,
 };
@@ -40,17 +41,15 @@ export default function MyTechStackSection() {
   const platformRefs = useNodeRefs(PLATFORMS);
 
   return (
-    <div className="rounded-3xl bg-gray-50 px-4 py-10 dark:bg-gray-900 lg:px-12 lg:py-16">
-      <SectionHeading>Crafting Android & iOS Experiences</SectionHeading>
+    <div className="rounded-3xl bg-gray-50 px-4 py-10 dark:bg-gray-900 lg:px-12 lg:py-16" data-section="mobile">
+      <SectionHeading textId="mobile.heading" />
       <div className="grid items-center gap-8 lg:grid-cols-2">
-        <p className="order-2 text-center text-sm leading-relaxed text-gray-600 dark:text-gray-300 lg:order-1 lg:pr-16 lg:text-left lg:text-lg lg:leading-8">
-          As a developer proficient in React Native, I craft intuitive Android
-          and iOS applications that deliver top-notch performance and user
-          satisfaction. From ideation to deployment, I specialize in building
-          cross-platform solutions with clean code, responsive designs, and a
-          focus on usability. Let&apos;s shape the future of mobile experiences
-          together!
-        </p>
+        <CustomText
+          as="p"
+          className="order-2 block text-center text-sm leading-relaxed text-gray-600 dark:text-gray-300 lg:order-1 lg:pr-16 lg:text-left lg:text-lg lg:leading-8"
+          id="mobile.body"
+          role="text"
+        />
         <div
           ref={containerRef}
           className="relative order-1 mx-auto flex h-[280px] w-full max-w-lg items-center justify-between overflow-hidden px-2 lg:order-2 lg:h-[340px] lg:px-6"
@@ -65,7 +64,7 @@ export default function MyTechStackSection() {
 
           <div
             ref={hubRef}
-            className="z-10 flex flex-col items-center justify-center gap-1 rounded-3xl border border-[#4DB6AC]/40 bg-white px-4 py-4 shadow-[0_0_32px_rgba(77,182,172,0.35)] dark:bg-neutral-950 lg:px-5 lg:py-5"
+            className="z-10 flex flex-col items-center justify-center gap-1 rounded-3xl border border-brand/40 bg-white px-4 py-4 shadow-[0_0_32px_hsl(var(--brand)/0.35)] dark:bg-neutral-950 lg:px-5 lg:py-5"
           >
             <div className="size-10 lg:size-12 [&>*]:size-full">
               <ReactIcon />

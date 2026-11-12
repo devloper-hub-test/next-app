@@ -7,6 +7,7 @@ import AnimationAuction from "../Lottiefiles/AnimationAuction.json";
 import AnimationFinTech from "../Lottiefiles/AnimationFinTech.json";
 import Link from "next/link";
 import SectionHeading from "./SectionHeading";
+import { CustomText } from "../../customizer/CustomText";
 
 interface Project {
   name: string;
@@ -36,10 +37,8 @@ const PROJECTS: Project[] = [
 
 export default function Projects() {
   return (
-    <div>
-      <SectionHeading subtitle="A few products I've helped build">
-        Projects
-      </SectionHeading>
+    <div data-section="projects">
+      <SectionHeading subtitleId="projects.subtitle" textId="projects.heading" />
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
         {PROJECTS.map((project) => (
           <ProjectCard key={project.name} project={project} />
@@ -49,8 +48,9 @@ export default function Projects() {
         <Link
           href="/projects"
           className="rounded-full border border-gray-300 px-6 py-2 text-sm font-semibold text-black transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800"
+          data-role="accent"
         >
-          View all projects →
+          <CustomText id="projects.cta" />
         </Link>
       </div>
     </div>
@@ -66,10 +66,10 @@ function ProjectCard({ project }: { project: Project }) {
         </div>
       </div>
       <CardContent className="flex flex-1 flex-col px-5 py-6 lg:px-6">
-        <h3 className="text-xl font-semibold text-black dark:text-white">
+        <h3 className="text-xl font-semibold text-black dark:text-white" data-role="heading">
           {project.name}
         </h3>
-        <p className="mt-2 line-clamp-4 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+        <p className="mt-2 line-clamp-4 text-sm leading-relaxed text-gray-600 dark:text-gray-300" data-role="text">
           {project.body}
         </p>
       </CardContent>

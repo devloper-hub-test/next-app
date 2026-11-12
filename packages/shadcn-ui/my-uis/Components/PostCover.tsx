@@ -3,11 +3,11 @@ import { cn } from "@/lib/utils";
 
 // Teal-leaning palettes so placeholder covers match the site accent
 const GRADIENTS = [
-  "from-[#4DB6AC] to-[#3b82f6]",
-  "from-[#0f766e] to-[#4DB6AC]",
-  "from-[#6366f1] to-[#4DB6AC]",
+  "from-brand to-[#3b82f6]",
+  "from-[#0f766e] to-brand",
+  "from-[#6366f1] to-brand",
   "from-[#0ea5e9] to-[#14b8a6]",
-  "from-[#4DB6AC] to-[#a855f7]",
+  "from-brand to-[#a855f7]",
 ];
 
 // Same title always gets the same gradient
