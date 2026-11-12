@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
+import { readBody } from "shadcn-ui/lib/request-body";
 import { getGame, markForSocket, saveGame } from "shadcn-ui/lib/game-store";
 import { pusherServer } from "shadcn-ui/lib/pusher";
 import { gameChannel, type Mark } from "shadcn-ui/types/game";
 
 export async function POST(request: Request): Promise<NextResponse> {
-  const body = await request.json().catch(() => null);
-  const gameId = body?.gameId;
-  const socketId = body?.socketId;
+  const body = await readBody(request);
+  const gameId = body.gameId;
+  const socketId = body.socketId;
   if (typeof gameId !== "string" || typeof socketId !== "string" || !socketId) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
@@ -23,11 +24,9 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   // Take whichever seat is free (X can be free if the creator left)
-  const playerSymbol: Mark | null = !game.sockets.X
-    ? "X"
-    : !game.sockets.O
-      ? "O"
-      : null;
+  let playerSymbol: Mark | null = null;
+  if (!game.sockets.X) playerSymbol = "X";
+  else if (!game.sockets.O) playerSymbol = "O";
   if (!playerSymbol) {
     return NextResponse.json({ error: "Game is full" }, { status: 409 });
   }

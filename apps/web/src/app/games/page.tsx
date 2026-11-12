@@ -3,6 +3,13 @@ import { Header } from "shadcn-ui";
 
 const GAMES = [
   {
+    href: "/games/chess",
+    emoji: "♞",
+    title: "Chess",
+    description: "Play the Stockfish engine on Easy, Medium, Hard or Very hard, or challenge a friend online.",
+    tag: "1 player vs computer · 2 players online",
+  },
+  {
     href: "/games/snake",
     emoji: "🐍",
     title: "Snake",

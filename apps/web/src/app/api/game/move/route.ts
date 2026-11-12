@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readBody } from "shadcn-ui/lib/request-body";
 import {
   checkWinner,
   getGame,
@@ -9,15 +10,10 @@ import { pusherServer } from "shadcn-ui/lib/pusher";
 import { gameChannel } from "shadcn-ui/types/game";
 
 export async function POST(request: Request): Promise<NextResponse> {
-  const body = await request.json().catch(() => null);
-  const gameId = body?.gameId;
-  const index = body?.index;
-  if (
-    typeof gameId !== "string" ||
-    !Number.isInteger(index) ||
-    index < 0 ||
-    index > 8
-  ) {
+  const body = await readBody(request);
+  const gameId = body.gameId;
+  const index = body.index;
+  if (typeof gameId !== "string" || typeof index !== "number" || !Number.isInteger(index) || index < 0 || index > 8) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
@@ -47,20 +43,16 @@ export async function POST(request: Request): Promise<NextResponse> {
   board[index] = mark;
   const { winner, winningLine } = checkWinner(board);
 
+  const nextPlayer = mark === "X" ? "O" : "X";
+  const scoreKey = winner === "Draw" ? "draws" : winner;
   game.state = {
     ...state,
     board,
     winner,
     winningLine,
-    currentPlayer: winner ? null : mark === "X" ? "O" : "X",
+    currentPlayer: winner ? null : nextPlayer,
     status: winner ? "finished" : "playing",
-    scores: winner
-      ? {
-          ...state.scores,
-          [winner === "Draw" ? "draws" : winner]:
-            state.scores[winner === "Draw" ? "draws" : winner] + 1,
-        }
-      : state.scores,
+    scores: scoreKey ? { ...state.scores, [scoreKey]: state.scores[scoreKey] + 1 } : state.scores,
   };
   saveGame(gameId, game);
 

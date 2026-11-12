@@ -4,7 +4,7 @@ import { getGame } from "shadcn-ui/lib/game-store";
 export const dynamic = "force-dynamic";
 
 // Current state of a game, used to resync after (re)subscribing to its channel
-export async function GET(request: Request): Promise<NextResponse> {
+export function GET(request: Request): NextResponse {
   const gameId = new URL(request.url).searchParams.get("gameId");
   const game = gameId ? getGame(gameId) : undefined;
   if (!game) {

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readBody } from "shadcn-ui/lib/request-body";
 import {
   deleteGame,
   emptyBoard,
@@ -11,8 +12,8 @@ import { gameChannel } from "shadcn-ui/types/game";
 
 // Called when a player clicks "Leave" or closes the tab (via navigator.sendBeacon)
 export async function POST(request: Request): Promise<NextResponse> {
-  const body = await request.json().catch(() => null);
-  const gameId = body?.gameId;
+  const body = await readBody(request);
+  const gameId = body.gameId;
   if (typeof gameId !== "string") {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }

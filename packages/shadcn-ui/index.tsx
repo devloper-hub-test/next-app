@@ -12,3 +12,4 @@ export { default as JokePopup } from "./my-uis/Home/JokePopup";
 export { default as SnakeGame } from "./my-uis/SnakeGame/SnakeGameMain";
 export { ThemeProvider, useThemeProvider } from "./my-uis/Home/ThemeProvider";
 export { default as KeyQuest } from "./my-uis/KeyQuest/KeyQuestMain";
+export { default as ChessGame } from "./my-uis/Chess/ChessMain";

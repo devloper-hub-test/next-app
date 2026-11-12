@@ -258,7 +258,7 @@ export default function SnakeGame() {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 px-4 py-6">
+    <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-3 px-4 py-3">
       <div className="flex w-full flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Badge variant="outline" className="px-3 py-1 text-base">

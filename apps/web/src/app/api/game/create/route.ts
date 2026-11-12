@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readBody } from "shadcn-ui/lib/request-body";
 import { customAlphabet } from "nanoid";
 import { createGame, getGame } from "shadcn-ui/lib/game-store";
 
@@ -6,8 +7,8 @@ import { createGame, getGame } from "shadcn-ui/lib/game-store";
 const newGameId = customAlphabet("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", 5);
 
 export async function POST(request: Request): Promise<NextResponse> {
-  const body = await request.json().catch(() => null);
-  const socketId = body?.socketId;
+  const body = await readBody(request);
+  const socketId = body.socketId;
   if (typeof socketId !== "string" || !socketId) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }

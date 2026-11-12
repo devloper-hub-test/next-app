@@ -166,7 +166,11 @@ export function GameBoard({ level, game, settings, children }: GameBoardProps) {
   if (game.crash) cells.set(cellKey(game.crash), "bg-red-500/60 rounded-sm animate-pulse");
 
   return (
-    <div className="relative w-full max-w-[min(100%,32rem)]">
+    // Fits one screen below the site header, stats and controls
+    <div
+      className="relative w-full"
+      style={{ maxWidth: "max(16rem, min(100%, 32rem, calc(100dvh - 19rem)))" }}
+    >
       <div
         className={cn(
           "relative grid aspect-square w-full touch-none select-none overflow-hidden rounded-xl border-4 p-1",
