@@ -1,16 +1,26 @@
 // app/api/pusher/auth/route.ts
-import { pusherServer } from "shadcn-ui/lib/pusher";
 import { NextResponse } from "next/server";
+import { pusherServer } from "shadcn-ui/lib/pusher";
+import { getGame, markForSocket } from "shadcn-ui/lib/game-store";
+import { gameChannel } from "shadcn-ui/types/game";
 
+// Only the two players of a game may subscribe to its private channel
 export async function POST(request: Request): Promise<NextResponse> {
-  const data = await request.text();
-  const [socketId, channelName] = data
-    .split("&")
-    .map((str) => str.split("=")[1]);
+  const params = new URLSearchParams(await request.text());
+  const socketId = params.get("socket_id");
+  const channelName = params.get("channel_name");
+  const gameId = channelName?.slice(gameChannel("").length);
 
-  // In a real application, you would verify the user's identity here
-  // For this example, we'll allow all authenticated requests to private channels
-  const auth = pusherServer.authorizeChannel(socketId, channelName);
+  const game = gameId ? getGame(gameId) : undefined;
+  if (
+    !socketId ||
+    !gameId ||
+    channelName !== gameChannel(gameId) ||
+    !game ||
+    !markForSocket(game, socketId)
+  ) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
-  return NextResponse.json(auth);
+  return NextResponse.json(pusherServer.authorizeChannel(socketId, channelName));
 }

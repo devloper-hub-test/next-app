@@ -1,41 +1,69 @@
 // lib/game-store.ts
-import type { GameState, Board, Player } from "../types/game";
+import type { Board, GameState, Mark } from "../types/game";
 
-const initialBoard: Board = Array(9).fill(null);
+interface StoredGame {
+  state: GameState;
+  sockets: Record<Mark, string | null>; // Pusher socket id of each player
+  updatedAt: number;
+}
 
-// In-memory store for game states. NOT FOR PRODUCTION.
-// In production, use a database like Redis, Supabase, or PostgreSQL.
-const games: { [gameId: string]: GameState } = {};
+// In-memory store, NOT FOR PRODUCTION: games are lost on restart, and serverless
+// hosts (e.g. Vercel) run routes in separate instances. Use Redis or a database there.
+// Kept on globalThis so every route handler shares one store and it survives dev reloads.
+const globalForGames = globalThis as typeof globalThis & {
+  ticTacToeGames?: Map<string, StoredGame>;
+};
+const games = (globalForGames.ticTacToeGames ??= new Map());
 
-export const getGame = (gameId: string): GameState | undefined => {
-  return games[gameId];
+const GAME_TTL_MS = 2 * 60 * 60 * 1000;
+
+const pruneStaleGames = () => {
+  const now = Date.now();
+  games.forEach((game, id) => {
+    if (now - game.updatedAt > GAME_TTL_MS) games.delete(id);
+  });
 };
 
-export const createNewGame = (gameId: string): GameState => {
-  const newGame: GameState = {
-    board: initialBoard,
-    currentPlayer: "X",
-    winner: null,
-    players: { X: null, O: null },
-    status: "waiting",
+export const emptyBoard = (): Board => Array(9).fill(null);
+
+export const getGame = (gameId: string): StoredGame | undefined =>
+  games.get(gameId);
+
+export const createGame = (gameId: string, socketId: string): StoredGame => {
+  pruneStaleGames();
+  const game: StoredGame = {
+    state: {
+      board: emptyBoard(),
+      currentPlayer: "X",
+      startingPlayer: "X",
+      winner: null,
+      winningLine: null,
+      players: { X: true, O: false },
+      scores: { X: 0, O: 0, draws: 0 },
+      status: "waiting",
+    },
+    sockets: { X: socketId, O: null },
+    updatedAt: Date.now(),
   };
-  games[gameId] = newGame;
-  return newGame;
+  games.set(gameId, game);
+  return game;
 };
 
-export const updateGame = (
-  gameId: string,
-  newState: Partial<GameState>
-): GameState | undefined => {
-  if (games[gameId]) {
-    games[gameId] = { ...games[gameId], ...newState };
-    return games[gameId];
-  }
-  return undefined;
+export const saveGame = (gameId: string, game: StoredGame): StoredGame => {
+  game.updatedAt = Date.now();
+  games.set(gameId, game);
+  return game;
 };
 
 export const deleteGame = (gameId: string) => {
-  delete games[gameId];
+  games.delete(gameId);
+};
+
+export const markForSocket = (game: StoredGame, socketId: unknown): Mark | null => {
+  if (typeof socketId !== "string" || !socketId) return null;
+  if (game.sockets.X === socketId) return "X";
+  if (game.sockets.O === socketId) return "O";
+  return null;
 };
 
 export const winningCombinations = [
@@ -49,19 +77,18 @@ export const winningCombinations = [
   [2, 4, 6], // Diagonals
 ];
 
-export const checkWinner = (currentBoard: Board): Player | "Draw" | null => {
-  for (let i = 0; i < winningCombinations.length; i++) {
-    const [a, b, c] = winningCombinations[i];
-    if (
-      currentBoard[a] &&
-      currentBoard[a] === currentBoard[b] &&
-      currentBoard[a] === currentBoard[c]
-    ) {
-      return currentBoard[a];
+export const checkWinner = (
+  board: Board
+): Pick<GameState, "winner" | "winningLine"> => {
+  for (const line of winningCombinations) {
+    const [a, b, c] = line;
+    const mark = board[a];
+    if (mark && mark === board[b] && mark === board[c]) {
+      return { winner: mark, winningLine: line };
     }
   }
-  if (currentBoard.every((cell) => cell !== null)) {
-    return "Draw";
+  if (board.every((cell) => cell !== null)) {
+    return { winner: "Draw", winningLine: null };
   }
-  return null;
+  return { winner: null, winningLine: null };
 };

@@ -1,20 +1,12 @@
 // lib/pusher.ts
-import PusherClient from "pusher-js";
+// Server-side Pusher instance. Only import this from API routes; the browser
+// client lives in lib/pusher-client.ts.
 import PusherServer from "pusher";
 
-// Client-side Pusher instance
-export const pusherClient = new PusherClient("25baf320fb69be6755ef", {
-  cluster: "ap2",
-  authEndpoint: "/api/pusher/auth",
-  authTransport: "ajax",
-  forceTLS: true,
-});
-
-// Server-side Pusher instance
 export const pusherServer = new PusherServer({
-  appId: "1912882",
-  key: "25baf320fb69be6755ef",
-  secret: "3c5b084cc45903bf609c",
-  cluster: "ap2",
+  appId: process.env.PUSHER_APP_ID as string,
+  key: process.env.NEXT_PUBLIC_PUSHER_KEY as string,
+  secret: process.env.PUSHER_SECRET as string,
+  cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER as string,
   useTLS: true,
 });

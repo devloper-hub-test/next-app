@@ -14,6 +14,8 @@ const NAV_LINKS = [
   { href: "/#work", label: "Work", section: "work" },
   { href: "/#projects", label: "Projects", section: "projects" },
   { href: "/blog", label: "Blog" },
+  { href: "/games", label: "Games" },
+  { href: "/learn", label: "Learn" },
 ];
 
 export default function Header() {

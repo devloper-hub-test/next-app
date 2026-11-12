@@ -1,670 +1,372 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useEffect, useReducer, useRef, type ReactNode } from "react";
 import { Button } from "../../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import {
-  Play,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  Grid3X3,
+  Home,
   Pause,
+  Play,
   RotateCcw,
   Trophy,
-  Home,
   Volume2,
   VolumeX,
-  Grid3X3,
 } from "lucide-react";
 import type {
-  Position,
   Direction,
-  GameState,
-  GameStats,
   GameSettings,
+  SnakeProgress,
 } from "../../types/snake-game";
-
 import { LEVELS } from "./levels";
-import { useGameTimer } from "./hooks/use-game-timer";
+import { initialSnakeState, snakeReducer } from "./engine";
+import { useSound } from "./hooks/use-sound";
+import { usePersistentState } from "../../hooks/use-persistent-state";
 import { GameBoard } from "./components/game-board";
 import { GameStatsPanel } from "./components/game-stats";
 import { LevelSelector } from "./components/level-selector";
 
+const KEY_DIRECTIONS: Record<string, Direction> = {
+  ArrowUp: "UP",
+  w: "UP",
+  W: "UP",
+  ArrowDown: "DOWN",
+  s: "DOWN",
+  S: "DOWN",
+  ArrowLeft: "LEFT",
+  a: "LEFT",
+  A: "LEFT",
+  ArrowRight: "RIGHT",
+  d: "RIGHT",
+  D: "RIGHT",
+};
+
+const SWIPE_THRESHOLD_PX = 24;
+
 export default function SnakeGame() {
-  const [currentLevel, setCurrentLevel] = useState(0);
-  const [gameState, setGameState] = useState<GameState>("MENU");
-  const [snake, setSnake] = useState<Position[]>([{ x: 7, y: 7 }]);
-  const [food, setFood] = useState<Position>({ x: 10, y: 10 });
-  const [direction, setDirection] = useState<Direction>("RIGHT");
-  const [nextDirection, setNextDirection] = useState<Direction>("RIGHT");
-  const [gameStats, setGameStats] = useState<GameStats>({
-    score: 0,
-    foodEaten: 0,
-    moves: 0,
-    timeElapsed: 0,
-  });
-  const [completedLevels, setCompletedLevels] = useState<number[]>([]);
-  const [settings, setSettings] = useState<GameSettings>({
-    nokiaMode: false,
-    soundEnabled: true,
-    showGrid: false,
-  });
-  const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
-
-  const level = LEVELS[currentLevel];
-  const { timeElapsed, resetTimer, formatTime } = useGameTimer(
-    gameState === "PLAYING"
+  const [game, dispatch] = useReducer(snakeReducer, undefined, () =>
+    initialSnakeState()
   );
+  const [settings, setSettings] = usePersistentState<GameSettings>(
+    "snake-settings",
+    { nokiaMode: false, soundEnabled: true, showGrid: false }
+  );
+  const [progress, setProgress] = usePersistentState<SnakeProgress>(
+    "snake-progress",
+    { completedLevels: [], bestScores: {} }
+  );
+  const playSound = useSound(settings.soundEnabled);
 
-  // Update game stats with timer
+  const level = LEVELS[game.levelIndex];
+  const isLastLevel = game.levelIndex === LEVELS.length - 1;
+  const best = progress.bestScores[level.id] ?? 0;
+
+  const startLevel = (levelIndex: number) =>
+    dispatch({ type: "START_LEVEL", levelIndex });
+  const togglePause = () =>
+    dispatch({ type: game.status === "PAUSED" ? "RESUME" : "PAUSE" });
+
+  // Game loop: one tick per move at the level's speed
   useEffect(() => {
-    setGameStats((prev) => ({ ...prev, timeElapsed }));
-  }, [timeElapsed]);
+    if (game.status !== "PLAYING") return;
+    const id = setInterval(() => dispatch({ type: "TICK" }), level.speed);
+    return () => clearInterval(id);
+  }, [game.status, level.speed]);
 
-  const wrapPosition = (pos: Position): Position => {
-    if (!level.allowWallWrap) return pos;
+  // Sounds and saved progress react to what just happened
+  const previous = useRef(game);
+  useEffect(() => {
+    const before = previous.current;
+    previous.current = game;
+    if (game.foodEaten > before.foodEaten && game.status === "PLAYING") {
+      playSound("eat");
+    }
+    if (game.status === before.status) return;
+    if (game.status === "GAME_OVER") playSound("crash");
+    if (game.status === "LEVEL_COMPLETE") playSound("complete");
+    if (game.status === "GAME_OVER" || game.status === "LEVEL_COMPLETE") {
+      setProgress((p) => ({
+        completedLevels:
+          game.status === "LEVEL_COMPLETE" && !p.completedLevels.includes(level.id)
+            ? [...p.completedLevels, level.id]
+            : p.completedLevels,
+        bestScores:
+          game.score > (p.bestScores[level.id] ?? 0)
+            ? { ...p.bestScores, [level.id]: game.score }
+            : p.bestScores,
+      }));
+    }
+  }, [game, level.id, playSound, setProgress]);
 
-    return {
-      x: pos.x < 0 ? level.gridSize - 1 : pos.x >= level.gridSize ? 0 : pos.x,
-      y: pos.y < 0 ? level.gridSize - 1 : pos.y >= level.gridSize ? 0 : pos.y,
+  // Keyboard controls (ignored while typing in a form field elsewhere on the page)
+  useEffect(() => {
+    if (game.status === "MENU") return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
+
+      const direction = KEY_DIRECTIONS[e.key];
+      if (direction) dispatch({ type: "TURN", direction });
+      else if (e.key === " " || e.key === "p" || e.key === "P") {
+        dispatch({ type: game.status === "PAUSED" ? "RESUME" : "PAUSE" });
+      } else if (e.key === "r" || e.key === "R") startLevel(game.levelIndex);
+      else if (e.key === "Escape") dispatch({ type: "MENU" });
+      else if (e.key === "Enter" && game.status === "GAME_OVER") startLevel(game.levelIndex);
+      else if (e.key === "Enter" && game.status === "LEVEL_COMPLETE" && !isLastLevel) {
+        startLevel(game.levelIndex + 1);
+      } else return;
+      e.preventDefault();
     };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [game.status, game.levelIndex, isLastLevel]);
+
+  // Pause automatically when the tab is hidden
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.hidden) dispatch({ type: "PAUSE" });
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, []);
+
+  // Swipe controls: turn as soon as the finger has moved far enough, so swipes can chain
+  const touchOrigin = useRef<{ x: number; y: number } | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchOrigin.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    const origin = touchOrigin.current;
+    if (!origin) return;
+    const { clientX, clientY } = e.touches[0];
+    const dx = clientX - origin.x;
+    const dy = clientY - origin.y;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_THRESHOLD_PX) return;
+    const direction: Direction =
+      Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "RIGHT" : "LEFT") : dy > 0 ? "DOWN" : "UP";
+    dispatch({ type: "TURN", direction });
+    touchOrigin.current = { x: clientX, y: clientY };
   };
 
-  const generateFood = useCallback(() => {
-    let newFood: Position;
-    let attempts = 0;
-    const maxAttempts = 100;
-
-    do {
-      newFood = {
-        x: Math.floor(Math.random() * level.gridSize),
-        y: Math.floor(Math.random() * level.gridSize),
-      };
-      attempts++;
-    } while (
-      attempts < maxAttempts &&
-      (snake.some(
-        (segment) => segment.x === newFood.x && segment.y === newFood.y
-      ) ||
-        level.obstacles.some(
-          (obstacle) => obstacle.x === newFood.x && obstacle.y === newFood.y
-        ))
+  if (game.status === "MENU") {
+    return (
+      <div className="mx-auto w-full max-w-5xl px-4 py-8">
+        <LevelSelector
+          levels={LEVELS}
+          progress={progress}
+          onSelectLevel={startLevel}
+          nokiaMode={settings.nokiaMode}
+          onToggleNokiaMode={() =>
+            setSettings((s) => ({ ...s, nokiaMode: !s.nokiaMode }))
+          }
+        />
+      </div>
     );
+  }
 
-    return newFood;
-  }, [snake, level]);
-
-  const resetGame = useCallback(() => {
-    const centerX = Math.floor(level.gridSize / 2);
-    const centerY = Math.floor(level.gridSize / 2);
-
-    setSnake([{ x: centerX, y: centerY }]);
-    setDirection("RIGHT");
-    setNextDirection("RIGHT");
-    setGameStats({
-      score: 0,
-      foodEaten: 0,
-      moves: 0,
-      timeElapsed: 0,
-    });
-    resetTimer();
-
-    // Generate initial food position
-    const initialFood = {
-      x: Math.floor(Math.random() * level.gridSize),
-      y: Math.floor(Math.random() * level.gridSize),
-    };
-    setFood(initialFood);
-  }, [level, resetTimer]);
-
-  const startLevel = useCallback(
-    (levelIndex: number) => {
-      setCurrentLevel(levelIndex);
-      setGameState("LOADING");
-
-      // Simulate loading for smooth transition
-      setTimeout(() => {
-        resetGame();
-        setGameState("PLAYING");
-      }, 300);
-    },
-    [resetGame]
+  const menuButton = (
+    <Button variant="outline" onClick={() => dispatch({ type: "MENU" })}>
+      Levels
+    </Button>
   );
 
-  const nextLevel = useCallback(() => {
-    // Mark current level as completed
-    setCompletedLevels((prev) => [...new Set([...prev, currentLevel])]);
-
-    if (currentLevel < LEVELS.length - 1) {
-      startLevel(currentLevel + 1);
-    } else {
-      setGameState("MENU");
-    }
-  }, [currentLevel, startLevel]);
-
-  const moveSnake = useCallback(() => {
-    if (gameState !== "PLAYING") return;
-
-    setDirection(nextDirection);
-
-    setSnake((currentSnake) => {
-      const newSnake = [...currentSnake];
-      const head = { ...newSnake[0] };
-
-      // Apply movement
-      switch (nextDirection) {
-        case "UP":
-          head.y -= 1;
-          break;
-        case "DOWN":
-          head.y += 1;
-          break;
-        case "LEFT":
-          head.x -= 1;
-          break;
-        case "RIGHT":
-          head.x += 1;
-          break;
-      }
-
-      // Handle wall wrapping or collision
-      if (level.allowWallWrap) {
-        head.x =
-          head.x < 0
-            ? level.gridSize - 1
-            : head.x >= level.gridSize
-              ? 0
-              : head.x;
-        head.y =
-          head.y < 0
-            ? level.gridSize - 1
-            : head.y >= level.gridSize
-              ? 0
-              : head.y;
-      } else {
-        // Check wall collision for non-wrapping levels
-        if (
-          head.x < 0 ||
-          head.x >= level.gridSize ||
-          head.y < 0 ||
-          head.y >= level.gridSize
-        ) {
-          setGameState("GAME_OVER");
-          return currentSnake;
-        }
-      }
-
-      // Check self collision
-      if (
-        newSnake.some((segment) => segment.x === head.x && segment.y === head.y)
-      ) {
-        setGameState("GAME_OVER");
-        return currentSnake;
-      }
-
-      // Check obstacle collision
-      if (
-        level.obstacles.some(
-          (obstacle) => obstacle.x === head.x && obstacle.y === head.y
-        )
-      ) {
-        setGameState("GAME_OVER");
-        return currentSnake;
-      }
-
-      newSnake.unshift(head);
-
-      // Check food collision
-      if (head.x === food.x && head.y === food.y) {
-        const baseScore = 10;
-        const levelBonus = level.id * 2;
-        const speedBonus = Math.max(0, Math.floor((200 - level.speed) / 10));
-        const newScore = gameStats.score + baseScore + levelBonus + speedBonus;
-        const newFoodEaten = gameStats.foodEaten + 1;
-
-        setGameStats((prev) => ({
-          ...prev,
-          score: newScore,
-          foodEaten: newFoodEaten,
-        }));
-
-        if (newFoodEaten >= level.foodTarget) {
-          setGameState("LEVEL_COMPLETE");
-        } else {
-          setFood(generateFood());
-        }
-      } else {
-        newSnake.pop();
-      }
-
-      // Increment moves counter
-      setGameStats((prev) => ({ ...prev, moves: prev.moves + 1 }));
-
-      return newSnake;
-    });
-  }, [nextDirection, food, gameState, level, gameStats, generateFood]);
-
-  // Handle keyboard input
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      e.preventDefault();
-
-      if (gameState === "PLAYING") {
-        switch (e.key) {
-          case "ArrowUp":
-          case "w":
-          case "W":
-            setNextDirection((prev) => (prev !== "DOWN" ? "UP" : prev));
-            break;
-          case "ArrowDown":
-          case "s":
-          case "S":
-            setNextDirection((prev) => (prev !== "UP" ? "DOWN" : prev));
-            break;
-          case "ArrowLeft":
-          case "a":
-          case "A":
-            setNextDirection((prev) => (prev !== "RIGHT" ? "LEFT" : prev));
-            break;
-          case "ArrowRight":
-          case "d":
-          case "D":
-            setNextDirection((prev) => (prev !== "LEFT" ? "RIGHT" : prev));
-            break;
-          case " ":
-            setGameState("PAUSED");
-            break;
-          case "Escape":
-            setGameState("MENU");
-            break;
-        }
-      } else if (gameState === "PAUSED") {
-        if (e.key === " ") {
-          setGameState("PLAYING");
-        } else if (e.key === "Escape") {
-          setGameState("MENU");
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [gameState]);
-
-  // Game loop
-  useEffect(() => {
-    if (gameState === "PLAYING") {
-      gameLoopRef.current = setInterval(moveSnake, level.speed);
-    } else {
-      if (gameLoopRef.current) {
-        clearInterval(gameLoopRef.current);
-      }
-    }
-
-    return () => {
-      if (gameLoopRef.current) {
-        clearInterval(gameLoopRef.current);
-      }
-    };
-  }, [moveSnake, gameState, level.speed]);
-
-  // Initialize food when level changes
-  useEffect(() => {
-    if (gameState === "PLAYING") {
-      setFood(generateFood());
-    }
-  }, [currentLevel, gameState]);
-
-  if (gameState === "MENU") {
-    return (
-      <LevelSelector
-        levels={LEVELS}
-        onSelectLevel={startLevel}
-        completedLevels={completedLevels}
-        nokiaMode={settings.nokiaMode}
-        onToggleNokiaMode={() =>
-          setSettings((prev) => ({ ...prev, nokiaMode: !prev.nokiaMode }))
-        }
-      />
-    );
-  }
-
-  if (gameState === "LOADING") {
-    return (
-      <div
-        className={`flex items-center justify-center min-h-screen ${
-          settings.nokiaMode
-            ? "bg-gradient-to-br from-green-900 to-black"
-            : "bg-gradient-to-br from-slate-50 to-slate-100"
-        }`}
-      >
-        <Card
-          className={
-            settings.nokiaMode
-              ? "bg-green-800 text-green-100"
-              : "w-full max-w-md"
-          }
+  let overlay: ReactNode = null;
+  switch (game.status) {
+    case "READY":
+      overlay = (
+        <Overlay title={`Level ${level.id}: ${level.name}`}>
+          <p className="text-sm text-muted-foreground">{level.description}</p>
+          <p className="text-sm">
+            Eat {level.foodTarget} food.{" "}
+            {level.allowWallWrap ? "You can pass through the edges." : "The edges are solid walls."}
+          </p>
+          <Button onClick={() => dispatch({ type: "TURN", direction: game.direction })}>
+            <Play className="mr-2 h-4 w-4" /> Start
+          </Button>
+          <p className="text-xs text-muted-foreground">or press an arrow key / swipe</p>
+        </Overlay>
+      );
+      break;
+    case "PAUSED":
+      overlay = (
+        <Overlay title="Paused">
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button onClick={() => dispatch({ type: "RESUME" })}>
+              <Play className="mr-2 h-4 w-4" /> Resume
+            </Button>
+            <Button variant="outline" onClick={() => startLevel(game.levelIndex)}>
+              Restart
+            </Button>
+            {menuButton}
+          </div>
+        </Overlay>
+      );
+      break;
+    case "GAME_OVER":
+      overlay = (
+        <Overlay title="Game over">
+          <p className="text-lg font-semibold">
+            Score {game.score}
+            {game.score > 0 && game.score === best && (
+              <span className="ml-2 text-orange-500">New best!</span>
+            )}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {game.foodEaten}/{level.foodTarget} food eaten
+          </p>
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button onClick={() => startLevel(game.levelIndex)} autoFocus>
+              <RotateCcw className="mr-2 h-4 w-4" /> Try again
+            </Button>
+            {menuButton}
+          </div>
+        </Overlay>
+      );
+      break;
+    case "LEVEL_COMPLETE":
+      overlay = (
+        <Overlay
+          title={isLastLevel ? "You beat every level! 🎉" : "Level complete!"}
+          icon={<Trophy className="h-8 w-8 text-yellow-500" />}
         >
-          <CardContent className="flex flex-col items-center justify-center p-8">
-            <div
-              className={`animate-spin rounded-full h-12 w-12 border-b-2 mb-4 ${
-                settings.nokiaMode ? "border-green-400" : "border-indigo-600"
-              }`}
-            ></div>
-            <p
-              className={`text-lg font-semibold ${settings.nokiaMode ? "text-green-200" : "text-slate-700"}`}
-            >
-              Loading {level.name}...
-            </p>
-            <p
-              className={`text-sm mt-2 ${settings.nokiaMode ? "text-green-300" : "text-slate-500"}`}
-            >
-              {level.description}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+          <p className="text-lg font-semibold">Score {game.score}</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {!isLastLevel && (
+              <Button onClick={() => startLevel(game.levelIndex + 1)} autoFocus>
+                Next level
+              </Button>
+            )}
+            <Button variant="outline" onClick={() => startLevel(game.levelIndex)}>
+              Replay
+            </Button>
+            {menuButton}
+          </div>
+        </Overlay>
+      );
+      break;
   }
+
+  const iconButton = (label: string, onClick: () => void, icon: ReactNode) => (
+    <Button variant="outline" size="icon" onClick={onClick} aria-label={label} title={label}>
+      {icon}
+    </Button>
+  );
 
   return (
-    <div
-      className={`min-h-screen p-4 ${
-        settings.nokiaMode
-          ? "bg-gradient-to-br from-green-900 to-black"
-          : "bg-gradient-to-br from-slate-50 via-white to-slate-100"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <Badge
-              variant="outline"
-              className={`text-lg px-4 py-2 shadow-sm ${
-                settings.nokiaMode
-                  ? "bg-green-800 text-green-100 border-green-600"
-                  : "bg-white"
-              }`}
-            >
-              Level {level.id}
-            </Badge>
-            <div>
-              <h1
-                className={`text-2xl md:text-3xl font-bold ${settings.nokiaMode ? "text-green-200" : "text-slate-800"}`}
-              >
-                {level.name}
-              </h1>
-              <p
-                className={
-                  settings.nokiaMode ? "text-green-300" : "text-slate-600"
-                }
-              >
-                {level.description}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() =>
-                setSettings((prev) => ({
-                  ...prev,
-                  soundEnabled: !prev.soundEnabled,
-                }))
-              }
-              variant="outline"
-              size="sm"
-              className={
-                settings.nokiaMode
-                  ? "bg-green-800 text-green-100 border-green-600 hover:bg-green-700"
-                  : "bg-white shadow-sm"
-              }
-            >
-              {settings.soundEnabled ? (
-                <Volume2 className="w-4 h-4" />
-              ) : (
-                <VolumeX className="w-4 h-4" />
-              )}
-            </Button>
-            <Button
-              onClick={() =>
-                setSettings((prev) => ({ ...prev, showGrid: !prev.showGrid }))
-              }
-              variant="outline"
-              size="sm"
-              className={
-                settings.nokiaMode
-                  ? "bg-green-800 text-green-100 border-green-600 hover:bg-green-700"
-                  : "bg-white shadow-sm"
-              }
-            >
-              <Grid3X3 className="w-4 h-4" />
-            </Button>
-            <Button
-              onClick={() => setGameState("MENU")}
-              variant="outline"
-              size="sm"
-              className={
-                settings.nokiaMode
-                  ? "bg-green-800 text-green-100 border-green-600 hover:bg-green-700"
-                  : "bg-white shadow-sm"
-              }
-            >
-              <Home className="w-4 h-4 mr-2" />
-              Menu
-            </Button>
+    <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 px-4 py-6">
+      <div className="flex w-full flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="px-3 py-1 text-base">
+            Level {level.id}
+          </Badge>
+          <div>
+            <h1 className="text-xl font-bold leading-tight">{level.name}</h1>
+            <p className="text-sm text-muted-foreground">{level.description}</p>
           </div>
         </div>
-
-        {/* Game Stats */}
-        <div className="mb-6">
-          <GameStatsPanel
-            stats={gameStats}
-            level={level}
-            formatTime={formatTime}
-          />
-        </div>
-
-        {/* Game Board */}
-        <div className="flex justify-center mb-6">
-          <GameBoard
-            level={level}
-            snake={snake}
-            food={food}
-            gameState={gameState}
-            settings={settings}
-          />
-        </div>
-
-        {/* Controls */}
-        <div className="flex justify-center gap-4">
-          {gameState === "PLAYING" && (
-            <Button
-              onClick={() => setGameState("PAUSED")}
-              className={`flex items-center gap-2 shadow-lg ${
-                settings.nokiaMode
-                  ? "bg-green-600 hover:bg-green-500 text-green-100"
-                  : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-              }`}
-            >
-              <Pause className="w-4 h-4" />
-              Pause
-            </Button>
+        <div className="flex gap-1.5">
+          {iconButton(
+            settings.soundEnabled ? "Mute sounds" : "Unmute sounds",
+            () => setSettings((s) => ({ ...s, soundEnabled: !s.soundEnabled })),
+            settings.soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />
           )}
-          {gameState === "PAUSED" && (
-            <Button
-              onClick={() => setGameState("PLAYING")}
-              className={`flex items-center gap-2 shadow-lg ${
-                settings.nokiaMode
-                  ? "bg-green-600 hover:bg-green-500 text-green-100"
-                  : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
-              }`}
-            >
-              <Play className="w-4 h-4" />
-              Resume
-            </Button>
+          {iconButton(
+            settings.showGrid ? "Hide grid" : "Show grid",
+            () => setSettings((s) => ({ ...s, showGrid: !s.showGrid })),
+            <Grid3X3 className="h-4 w-4" />
           )}
-          <Button
-            onClick={() => {
-              resetGame();
-              setGameState("PLAYING");
-            }}
-            variant="outline"
-            className={`flex items-center gap-2 shadow-lg ${
-              settings.nokiaMode
-                ? "bg-green-800 text-green-100 border-green-600 hover:bg-green-700"
-                : "bg-white hover:bg-slate-50"
-            }`}
-          >
-            <RotateCcw className="w-4 h-4" />
-            Restart
-          </Button>
+          {(game.status === "PLAYING" || game.status === "PAUSED") &&
+            iconButton(
+              game.status === "PAUSED" ? "Resume (Space)" : "Pause (Space)",
+              togglePause,
+              game.status === "PAUSED" ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />
+            )}
+          {iconButton("Restart level (R)", () => startLevel(game.levelIndex), <RotateCcw className="h-4 w-4" />)}
+          {iconButton("Level menu (Esc)", () => dispatch({ type: "MENU" }), <Home className="h-4 w-4" />)}
         </div>
+      </div>
 
-        {/* Game Over Modal */}
-        {gameState === "GAME_OVER" && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <Card
-              className={`w-full max-w-md transform animate-in zoom-in-95 duration-200 ${
-                settings.nokiaMode
-                  ? "bg-green-800 text-green-100 border-green-600"
-                  : ""
-              }`}
-            >
-              <CardHeader className="text-center">
-                <CardTitle
-                  className={`text-3xl mb-2 ${settings.nokiaMode ? "text-red-400" : "text-red-600"}`}
-                >
-                  Game Over!
-                </CardTitle>
-                <div className="space-y-2">
-                  <p
-                    className={`text-xl font-semibold ${settings.nokiaMode ? "text-green-200" : "text-slate-700"}`}
-                  >
-                    Final Score: {gameStats.score}
-                  </p>
-                  <p
-                    className={
-                      settings.nokiaMode ? "text-green-300" : "text-slate-600"
-                    }
-                  >
-                    Time: {formatTime(gameStats.timeElapsed)}
-                  </p>
-                  <p
-                    className={
-                      settings.nokiaMode ? "text-green-300" : "text-slate-600"
-                    }
-                  >
-                    Moves: {gameStats.moves}
-                  </p>
-                </div>
-              </CardHeader>
-              <CardContent className="flex gap-3">
-                <Button
-                  onClick={() => {
-                    resetGame();
-                    setGameState("PLAYING");
-                  }}
-                  className={`flex-1 ${
-                    settings.nokiaMode
-                      ? "bg-green-600 hover:bg-green-500 text-green-100"
-                      : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-                  }`}
-                >
-                  Try Again
-                </Button>
-                <Button
-                  onClick={() => setGameState("MENU")}
-                  variant="outline"
-                  className={`flex-1 ${settings.nokiaMode ? "border-green-600 text-green-200 hover:bg-green-700" : ""}`}
-                >
-                  Menu
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+      <GameStatsPanel
+        score={game.score}
+        best={best}
+        foodEaten={game.foodEaten}
+        seconds={(game.moves * level.speed) / 1000}
+        level={level}
+      />
 
-        {/* Level Complete Modal */}
-        {gameState === "LEVEL_COMPLETE" && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <Card
-              className={`w-full max-w-md transform animate-in zoom-in-95 duration-200 ${
-                settings.nokiaMode
-                  ? "bg-green-800 text-green-100 border-green-600"
-                  : ""
-              }`}
-            >
-              <CardHeader className="text-center">
-                <CardTitle
-                  className={`text-3xl flex items-center justify-center gap-2 mb-2 ${
-                    settings.nokiaMode ? "text-yellow-400" : "text-green-600"
-                  }`}
-                >
-                  <Trophy className="w-8 h-8" />
-                  Level Complete!
-                </CardTitle>
-                <div className="space-y-2">
-                  <p
-                    className={`text-xl font-semibold ${settings.nokiaMode ? "text-green-200" : "text-slate-700"}`}
-                  >
-                    Score: {gameStats.score}
-                  </p>
-                  <p
-                    className={
-                      settings.nokiaMode ? "text-green-300" : "text-slate-600"
-                    }
-                  >
-                    Time: {formatTime(gameStats.timeElapsed)}
-                  </p>
-                  <p
-                    className={
-                      settings.nokiaMode ? "text-green-300" : "text-slate-600"
-                    }
-                  >
-                    Moves: {gameStats.moves}
-                  </p>
-                </div>
-              </CardHeader>
-              <CardContent className="flex gap-3">
-                {currentLevel < LEVELS.length - 1 ? (
-                  <Button
-                    onClick={nextLevel}
-                    className={`flex-1 ${
-                      settings.nokiaMode
-                        ? "bg-green-600 hover:bg-green-500 text-green-100"
-                        : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
-                    }`}
-                  >
-                    Next Level
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => setGameState("MENU")}
-                    className={`flex-1 ${
-                      settings.nokiaMode
-                        ? "bg-purple-600 hover:bg-purple-500 text-purple-100"
-                        : "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
-                    }`}
-                  >
-                    🎉 Game Complete!
-                  </Button>
-                )}
-                <Button
-                  onClick={() => setGameState("MENU")}
-                  variant="outline"
-                  className={`flex-1 ${settings.nokiaMode ? "border-green-600 text-green-200 hover:bg-green-700" : ""}`}
-                >
-                  Menu
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+      <div className="flex w-full justify-center" onTouchStart={onTouchStart} onTouchMove={onTouchMove}>
+        <GameBoard level={level} game={game} settings={settings}>
+          {overlay}
+        </GameBoard>
+      </div>
+
+      {/* On-screen controls for touch devices */}
+      <div className="grid grid-cols-3 gap-2 md:hidden" aria-label="Direction controls">
+        <span />
+        <DirectionButton direction="UP" onTurn={(direction) => dispatch({ type: "TURN", direction })} />
+        <span />
+        <DirectionButton direction="LEFT" onTurn={(direction) => dispatch({ type: "TURN", direction })} />
+        <Button
+          variant="secondary"
+          className="h-14 w-14"
+          onClick={togglePause}
+          disabled={game.status !== "PLAYING" && game.status !== "PAUSED"}
+          aria-label={game.status === "PAUSED" ? "Resume" : "Pause"}
+        >
+          {game.status === "PAUSED" ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
+        </Button>
+        <DirectionButton direction="RIGHT" onTurn={(direction) => dispatch({ type: "TURN", direction })} />
+        <span />
+        <DirectionButton direction="DOWN" onTurn={(direction) => dispatch({ type: "TURN", direction })} />
+        <span />
       </div>
     </div>
+  );
+}
+
+function Overlay({ title, icon, children }: { title: string; icon?: ReactNode; children: ReactNode }) {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-background/70 p-4 backdrop-blur-[2px]">
+      <div className="flex max-w-xs flex-col items-center gap-3 rounded-xl border bg-card p-5 text-center text-card-foreground shadow-xl">
+        {icon}
+        <h2 className="text-2xl font-bold">{title}</h2>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+const DIRECTION_ICONS: Record<Direction, ReactNode> = {
+  UP: <ChevronUp className="h-6 w-6" />,
+  DOWN: <ChevronDown className="h-6 w-6" />,
+  LEFT: <ChevronLeft className="h-6 w-6" />,
+  RIGHT: <ChevronRight className="h-6 w-6" />,
+};
+
+function DirectionButton({
+  direction,
+  onTurn,
+}: {
+  direction: Direction;
+  onTurn: (direction: Direction) => void;
+}) {
+  return (
+    <Button
+      variant="outline"
+      className="h-14 w-14 touch-none"
+      aria-label={`Move ${direction.toLowerCase()}`}
+      // pointerdown reacts instantly; click would wait for the finger to lift
+      onPointerDown={(e) => {
+        e.preventDefault();
+        onTurn(direction);
+      }}
+    >
+      {DIRECTION_ICONS[direction]}
+    </Button>
   );
 }

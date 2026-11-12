@@ -65,7 +65,7 @@ export const getPage = async (pageId: string, allTags?: Tag[]) => {
 
 export async function getTags(): Promise<Tag[]> {
   const response = await notion.databases.query({
-    database_id: "20d8acd0d5d7804db760d919ff3b1779",
+    database_id: process.env.NOTION_TAGS_DB_ID as string,
   });
 
   return response.results.map((page: any) => ({
@@ -77,7 +77,7 @@ export async function getTags(): Promise<Tag[]> {
 
 export async function getPublishedPosts() {
   return notion.databases.query({
-    database_id: "20d8acd0d5d780268883c4bb4b2d9e6b",
+    database_id: process.env.NOTION_POSTS_DB_ID as string,
     // filter: {
     //   property: "Published",
     //   status: { equals: "Done" },
@@ -90,7 +90,7 @@ export async function getPageBySlug(
   slug: string
 ): Promise<QueryDatabaseResponse["results"][number] | undefined> {
   const response = await notion.databases.query({
-    database_id: "20d8acd0d5d780268883c4bb4b2d9e6b",
+    database_id: process.env.NOTION_POSTS_DB_ID as string,
     filter: {
       property: "Slug",
       rich_text: { equals: slug },

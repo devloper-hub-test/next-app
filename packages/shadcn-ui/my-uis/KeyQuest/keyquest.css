@@ -1,0 +1,41 @@
+/* Styles for react-simple-keyboard, using the site's theme colours so dark mode just works */
+.kq-keyboard.simple-keyboard.hg-theme-default {
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+}
+.kq-keyboard.hg-theme-default .hg-button {
+  height: 2.6rem;
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border));
+  border-bottom-width: 3px;
+  box-shadow: none;
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  font-size: 0.85rem;
+}
+.kq-keyboard.hg-theme-default .hg-button.hg-activeButton {
+  background: hsl(var(--muted));
+}
+.kq-keyboard.hg-theme-default .hg-button.kq-home span {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.kq-keyboard.hg-theme-default .hg-button.kq-next {
+  background: #10b981;
+  border-color: #047857;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 0 0 3px rgb(16 185 129 / 0.35);
+}
+
+/* Wrong key: the current letter flashes red and shakes */
+@keyframes kq-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+.kq-wrong {
+  animation: kq-shake 0.18s ease-in-out;
+  background: rgb(239 68 68 / 0.3) !important;
+}

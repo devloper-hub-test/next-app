@@ -1,108 +1,217 @@
-import type { Position, Level, GameSettings } from "../../../types/snake-game";
+import type { ReactNode } from "react";
+import { cellKey } from "../engine";
+import type {
+  Direction,
+  GameSettings,
+  Level,
+  Position,
+  SnakeState,
+} from "../../../types/snake-game";
+import { cn } from "../../../lib/utils";
+
+// Snake colours per level: outline, body fill and head
+const SNAKE_COLORS: Record<string, { outline: string; body: string; head: string }> = {
+  emerald: { outline: "#047857", body: "#34d399", head: "#10b981" },
+  blue: { outline: "#1d4ed8", body: "#60a5fa", head: "#3b82f6" },
+  purple: { outline: "#7e22ce", body: "#c084fc", head: "#a855f7" },
+  orange: { outline: "#c2410c", body: "#fb923c", head: "#f97316" },
+  red: { outline: "#b91c1c", body: "#f87171", head: "#ef4444" },
+  cyan: { outline: "#0e7490", body: "#22d3ee", head: "#06b6d4" },
+  indigo: { outline: "#4338ca", body: "#818cf8", head: "#6366f1" },
+  pink: { outline: "#be185d", body: "#f472b6", head: "#ec4899" },
+  yellow: { outline: "#a16207", body: "#fde047", head: "#eab308" },
+  teal: { outline: "#0f766e", body: "#2dd4bf", head: "#14b8a6" },
+  green: { outline: "#15803d", body: "#4ade80", head: "#22c55e" },
+  slate: { outline: "#334155", body: "#94a3b8", head: "#64748b" },
+  gray: { outline: "#374151", body: "#9ca3af", head: "#6b7280" },
+};
+
+const FORWARD: Record<Direction, Position> = {
+  UP: { x: 0, y: -1 },
+  DOWN: { x: 0, y: 1 },
+  LEFT: { x: -1, y: 0 },
+  RIGHT: { x: 1, y: 0 },
+};
+
+// Pairs of neighbouring segments to draw as body pieces (skips the jump where the snake wraps an edge)
+const bodyLinks = (snake: Position[]) =>
+  snake.slice(1).flatMap((segment, i) => {
+    const previous = snake[i];
+    const adjacent = Math.abs(previous.x - segment.x) + Math.abs(previous.y - segment.y) === 1;
+    return adjacent ? [{ from: previous, to: segment, index: i + 1 }] : [];
+  });
+
+// Full thickness, tapering over the last few segments into a thin tail
+const thickness = (index: number, length: number) => {
+  const fromTail = length - 1 - index;
+  return fromTail >= 4 ? 1 : 0.45 + (fromTail / 4) * 0.55;
+};
+
+function SnakeSprite({ game, level }: { game: SnakeState; level: Level }) {
+  const colors = SNAKE_COLORS[level.color] ?? SNAKE_COLORS.emerald;
+  const head = game.snake[0];
+  if (!head) return null;
+
+  const links = bodyLinks(game.snake);
+  const length = game.snake.length;
+  const forward = FORWARD[game.direction];
+  const side = { x: -forward.y, y: forward.x }; // perpendicular to the direction of travel
+  const hx = head.x + 0.5;
+  const hy = head.y + 0.5;
+  const eyes = [1, -1].map((s) => ({
+    x: hx + forward.x * 0.14 + side.x * 0.2 * s,
+    y: hy + forward.y * 0.14 + side.y * 0.2 * s,
+  }));
+  const dead = game.status === "GAME_OVER";
+
+  return (
+    <g>
+      {/* Body: dark outline pass, then a lighter fill pass on top, so it reads as one rounded tube.
+          Each link is a trapezoid between the two segments' widths, with round joints, so the tail tapers smoothly. */}
+      {[
+        { color: colors.outline, width: 0.78 },
+        { color: colors.body, width: 0.58 },
+      ].map((pass) => (
+        <g key={pass.color} fill={pass.color}>
+          {links.map(({ from, to, index }) => {
+            const r1 = (pass.width * thickness(index - 1, length)) / 2;
+            const r2 = (pass.width * thickness(index, length)) / 2;
+            const px = -(to.y - from.y); // unit perpendicular to the link
+            const py = to.x - from.x;
+            const [ax, ay, bx, by] = [from.x + 0.5, from.y + 0.5, to.x + 0.5, to.y + 0.5];
+            return (
+              <g key={index}>
+                <polygon
+                  points={`${ax + px * r1},${ay + py * r1} ${bx + px * r2},${by + py * r2} ${bx - px * r2},${by - py * r2} ${ax - px * r1},${ay - py * r1}`}
+                />
+                <circle cx={bx} cy={by} r={r2} />
+              </g>
+            );
+          })}
+        </g>
+      ))}
+      {/* Scale spots along the back */}
+      {game.snake.slice(1, -2).map((segment, i) =>
+        i % 2 === 1 ? (
+          <circle key={i} cx={segment.x + 0.5} cy={segment.y + 0.5} r={0.1} fill={colors.outline} opacity={0.35} />
+        ) : null
+      )}
+      {/* Head, a little wider than the body */}
+      <circle cx={hx} cy={hy} r={0.48} fill={colors.outline} />
+      <circle cx={hx} cy={hy} r={0.39} fill={colors.head} />
+      {!dead && game.status === "PLAYING" && (
+        <path
+          d={`M ${hx + forward.x * 0.42} ${hy + forward.y * 0.42} l ${forward.x * 0.22} ${forward.y * 0.22}`}
+          stroke="#e11d48"
+          strokeWidth={0.07}
+          strokeLinecap="round"
+        />
+      )}
+      {eyes.map((eye, i) => (
+        <g key={i}>
+          <circle cx={eye.x} cy={eye.y} r={0.12} fill="white" />
+          {dead ? (
+            <path
+              d={`M ${eye.x - 0.07} ${eye.y - 0.07} l 0.14 0.14 M ${eye.x + 0.07} ${eye.y - 0.07} l -0.14 0.14`}
+              stroke="#111827"
+              strokeWidth={0.04}
+            />
+          ) : (
+            <circle
+              cx={eye.x + forward.x * 0.04}
+              cy={eye.y + forward.y * 0.04}
+              r={0.06}
+              fill="#111827"
+            />
+          )}
+        </g>
+      ))}
+    </g>
+  );
+}
+
+function Apple({ at }: { at: Position }) {
+  const x = at.x + 0.5;
+  const y = at.y + 0.55;
+  return (
+    <g className="animate-pulse">
+      <circle cx={x} cy={y} r={0.36} fill="#ef4444" />
+      <circle cx={x - 0.12} cy={y - 0.1} r={0.08} fill="white" opacity={0.6} />
+      <path d={`M ${x} ${y - 0.32} q 0.02 -0.12 0.08 -0.16`} stroke="#78350f" strokeWidth={0.05} fill="none" />
+      <ellipse cx={x + 0.14} cy={y - 0.42} rx={0.12} ry={0.06} fill="#22c55e" transform={`rotate(-30 ${x + 0.14} ${y - 0.42})`} />
+    </g>
+  );
+}
 
 interface GameBoardProps {
   level: Level;
-  snake: Position[];
-  food: Position;
-  gameState: string;
+  game: SnakeState;
   settings: GameSettings;
+  children?: ReactNode; // overlay (start, pause, game over…)
 }
 
-export function GameBoard({
-  level,
-  snake,
-  food,
-  gameState,
-  settings,
-}: GameBoardProps) {
-  const renderCell = (x: number, y: number) => {
-    const isSnakeHead = snake[0]?.x === x && snake[0]?.y === y;
-    const isSnakeBody = snake
-      .slice(1)
-      .some((segment) => segment.x === x && segment.y === y);
-    const isFood = food.x === x && food.y === y;
-    const isObstacle = level.obstacles.some(
-      (obstacle) => obstacle.x === x && obstacle.y === y
-    );
+export function GameBoard({ level, game, settings, children }: GameBoardProps) {
+  const nokia = settings.nokiaMode;
+  const n = level.gridSize;
 
-    if (settings.nokiaMode) {
-      // Nokia-style rendering
-      let cellClass = "relative w-4 h-4 border transition-all duration-100 ";
-
-      if (isSnakeHead) {
-        cellClass += "bg-green-400 border-green-500";
-      } else if (isSnakeBody) {
-        cellClass += "bg-green-500 border-green-600";
-      } else if (isFood) {
-        cellClass += "bg-yellow-400 border-yellow-500 animate-pulse";
-      } else if (isObstacle) {
-        cellClass += "bg-gray-800 border-gray-900";
-      } else {
-        cellClass += settings.showGrid
-          ? "bg-green-900 border-green-800"
-          : "bg-green-900 border-green-900";
-      }
-
-      return <div key={`${x}-${y}`} className={cellClass} />;
-    } else {
-      // Modern style rendering
-      let cellClass =
-        "relative w-5 h-5 transition-all duration-150 ease-in-out ";
-
-      if (isSnakeHead) {
-        cellClass += `bg-gradient-to-br from-${level.color}-400 to-${level.color}-600 rounded-lg shadow-lg transform scale-110 animate-pulse`;
-      } else if (isSnakeBody) {
-        cellClass += `bg-gradient-to-br from-${level.color}-300 to-${level.color}-500 rounded-md shadow-md`;
-      } else if (isFood) {
-        cellClass +=
-          "bg-gradient-to-br from-rose-400 to-rose-600 rounded-full shadow-lg animate-bounce";
-      } else if (isObstacle) {
-        cellClass +=
-          "bg-gradient-to-br from-slate-600 to-slate-800 rounded-md shadow-lg";
-      } else {
-        cellClass += settings.showGrid
-          ? "bg-gradient-to-br from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-200 rounded-sm border border-slate-200"
-          : "bg-gradient-to-br from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-200 rounded-sm";
-      }
-
-      return (
-        <div key={`${x}-${y}`} className={cellClass}>
-          {isFood && !settings.nokiaMode && (
-            <div className="absolute inset-0 bg-rose-300 rounded-full animate-ping opacity-75" />
-          )}
-          {isSnakeHead && !settings.nokiaMode && (
-            <div className="absolute inset-1 bg-white rounded-full opacity-30" />
-          )}
-        </div>
-      );
-    }
-  };
+  // Grid cells hold the background, walls and (in Nokia mode) the pixel snake
+  const cells = new Map<string, string>();
+  level.obstacles.forEach((o) =>
+    cells.set(cellKey(o), nokia ? "bg-[#43523d]" : "rounded-sm bg-slate-500 dark:bg-slate-500")
+  );
+  if (nokia) {
+    if (game.food) cells.set(cellKey(game.food), "bg-[#43523d] rounded-full scale-75");
+    game.snake.forEach((segment) => cells.set(cellKey(segment), "bg-[#43523d] scale-90"));
+  }
+  if (game.crash) cells.set(cellKey(game.crash), "bg-red-500/60 rounded-sm animate-pulse");
 
   return (
-    <div className="relative">
+    <div className="relative w-full max-w-[min(100%,32rem)]">
       <div
-        className={`grid gap-0 mx-auto rounded-2xl p-4 shadow-2xl transition-all duration-300 ${
-          settings.nokiaMode
-            ? `bg-black border-4 border-green-600 ${gameState === "GAME_OVER" ? "animate-pulse border-red-500" : ""}`
-            : `border-4 border-slate-200 bg-gradient-to-br from-white to-slate-50 ${gameState === "GAME_OVER" ? "animate-pulse border-red-300" : ""}`
-        }`}
-        style={{
-          gridTemplateColumns: `repeat(${level.gridSize}, minmax(0, 1fr))`,
-          width: "fit-content",
-        }}
+        className={cn(
+          "relative grid aspect-square w-full touch-none select-none overflow-hidden rounded-xl border-4 p-1",
+          nokia
+            ? "border-[#43523d] bg-[#c7f0d8]"
+            : "border-slate-200 bg-lime-50 dark:border-slate-700 dark:bg-slate-900",
+          !level.allowWallWrap && !nokia && "border-slate-400 dark:border-slate-500"
+        )}
+        style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}
+        role="img"
+        aria-label={`Snake board, ${n} by ${n}`}
       >
-        {Array.from({ length: level.gridSize }, (_, y) =>
-          Array.from({ length: level.gridSize }, (_, x) => renderCell(x, y))
+        {Array.from({ length: n * n }, (_, i) => {
+          const x = i % n;
+          const y = Math.floor(i / n);
+          const key = cellKey({ x, y });
+          return (
+            <div
+              key={key}
+              className={cn(
+                "aspect-square",
+                // Subtle checkerboard, like a lawn
+                !nokia && (x + y) % 2 === 0 && "bg-lime-100/70 dark:bg-slate-800/40",
+                settings.showGrid &&
+                  (nokia
+                    ? "outline outline-1 outline-[#43523d]/10"
+                    : "outline outline-1 outline-slate-300/60 dark:outline-slate-700"),
+                cells.get(key)
+              )}
+            />
+          );
+        })}
+
+        {!nokia && (
+          <svg
+            className="pointer-events-none absolute inset-1"
+            viewBox={`0 0 ${n} ${n}`}
+            aria-hidden
+          >
+            {game.food && <Apple at={game.food} />}
+            <SnakeSprite game={game} level={level} />
+          </svg>
         )}
       </div>
-
-      {level.allowWallWrap && (
-        <div
-          className={`text-center mt-2 text-sm ${settings.nokiaMode ? "text-green-400" : "text-slate-500"}`}
-        >
-          🔄 Wall Wrap Enabled
-        </div>
-      )}
+      {children}
     </div>
   );
 }

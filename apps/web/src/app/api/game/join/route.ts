@@ -1,79 +1,43 @@
 import { NextResponse } from "next/server";
-import { getGame, updateGame } from "shadcn-ui/lib/game-store";
+import { getGame, markForSocket, saveGame } from "shadcn-ui/lib/game-store";
 import { pusherServer } from "shadcn-ui/lib/pusher";
-
-interface JoinGameRequestBody {
-  gameId: string;
-  socketId: string;
-}
+import { gameChannel, type Mark } from "shadcn-ui/types/game";
 
 export async function POST(request: Request): Promise<NextResponse> {
-  try {
-    const body: unknown = await request.json();
+  const body = await request.json().catch(() => null);
+  const gameId = body?.gameId;
+  const socketId = body?.socketId;
+  if (typeof gameId !== "string" || typeof socketId !== "string" || !socketId) {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
 
-    if (
-      typeof body !== "object" ||
-      body === null ||
-      !("gameId" in body) ||
-      !("socketId" in body) ||
-      typeof (body as JoinGameRequestBody).gameId !== "string" ||
-      typeof (body as JoinGameRequestBody).socketId !== "string"
-    ) {
-      return NextResponse.json(
-        { error: "Invalid request body" },
-        { status: 400 }
-      );
-    }
-
-    const { gameId, socketId } = body as JoinGameRequestBody;
-
-    const game = getGame(gameId);
-    if (!game) {
-      return NextResponse.json({ error: "Game not found" }, { status: 404 });
-    }
-
-    if (game.players.X && game.players.O) {
-      return NextResponse.json({ error: "Game is full" }, { status: 400 });
-    }
-
-    let playerSymbol: "X" | "O";
-    if (!game.players.X) {
-      playerSymbol = "X";
-      updateGame(gameId, { players: { ...game.players, X: socketId } });
-    } else {
-      playerSymbol = "O";
-      updateGame(gameId, { players: { ...game.players, O: socketId } });
-    }
-
-    const updatedGame = updateGame(gameId, { status: "playing" });
-
-    // Notify joining player
-    await pusherServer.trigger(socketId, "game-joined", {
-      gameId,
-      playerSymbol,
-    });
-
-    // Notify existing player
-    const otherPlayerSocketId =
-      playerSymbol === "X" ? game.players.O : game.players.X;
-    if (otherPlayerSocketId) {
-      await pusherServer.trigger(otherPlayerSocketId, "opponent-joined", {
-        game: updatedGame,
-      });
-    }
-
-    // Notify private channel with updated game state
-    await pusherServer.trigger(
-      `private-${gameId}`,
-      "game-state-update",
-      updatedGame
-    );
-
-    return NextResponse.json({ gameId, playerSymbol });
-  } catch (error) {
+  const game = getGame(gameId);
+  if (!game) {
+    return NextResponse.json({ error: "Game not found" }, { status: 404 });
+  }
+  if (markForSocket(game, socketId)) {
     return NextResponse.json(
-      { error: "Internal server error during game join." },
-      { status: 500 }
+      { error: "You're already in this game" },
+      { status: 400 }
     );
   }
+
+  // Take whichever seat is free (X can be free if the creator left)
+  const playerSymbol: Mark | null = !game.sockets.X
+    ? "X"
+    : !game.sockets.O
+      ? "O"
+      : null;
+  if (!playerSymbol) {
+    return NextResponse.json({ error: "Game is full" }, { status: 409 });
+  }
+
+  game.sockets[playerSymbol] = socketId;
+  game.state.players[playerSymbol] = true;
+  game.state.status = "playing";
+  saveGame(gameId, game);
+
+  await pusherServer.trigger(gameChannel(gameId), "game-state-update", game.state);
+
+  return NextResponse.json({ gameId, playerSymbol, game: game.state });
 }

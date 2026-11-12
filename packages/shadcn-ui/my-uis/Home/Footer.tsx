@@ -11,7 +11,8 @@ const QUICK_LINKS = [
   { href: "/#about", label: "About Me" },
   { href: "/projects", label: "Projects" },
   { href: "/blog", label: "Blog" },
-  { href: "/games/tic-tac-toe", label: "Tic-Tac-Toe" },
+  { href: "/games", label: "Games" },
+  { href: "/learn", label: "Learn" },
 ];
 
 // TODO: replace the placeholder profile URLs with real ones

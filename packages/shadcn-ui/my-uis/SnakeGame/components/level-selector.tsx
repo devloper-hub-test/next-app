@@ -1,205 +1,95 @@
 "use client";
 
 import { Button } from "../../../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../../components/ui/card";
 import { Badge } from "../../../components/ui/badge";
-import { Target, Zap, Shield, Gamepad2 } from "lucide-react";
-import type { Level } from "../../../types/snake-game";
+import { Target, Zap, Shield, Gamepad2, CheckCircle2 } from "lucide-react";
+import type { Level, SnakeProgress } from "../../../types/snake-game";
+import { cn } from "../../../lib/utils";
 
 interface LevelSelectorProps {
   levels: Level[];
+  progress: SnakeProgress;
   onSelectLevel: (index: number) => void;
-  completedLevels: number[];
   nokiaMode: boolean;
   onToggleNokiaMode: () => void;
 }
 
+const difficulty = (level: Level) => {
+  if (level.speed > 150) return { text: "Easy", icon: <Target className="h-4 w-4 text-green-500" /> };
+  if (level.speed > 100) return { text: "Medium", icon: <Zap className="h-4 w-4 text-yellow-500" /> };
+  if (level.speed > 80) return { text: "Hard", icon: <Shield className="h-4 w-4 text-orange-500" /> };
+  return { text: "Insane", icon: <Shield className="h-4 w-4 text-red-500" /> };
+};
+
 export function LevelSelector({
   levels,
+  progress,
   onSelectLevel,
-  completedLevels,
   nokiaMode,
   onToggleNokiaMode,
 }: LevelSelectorProps) {
-  const getDifficultyIcon = (level: Level) => {
-    if (level.speed > 150) return <Target className="w-4 h-4 text-green-500" />;
-    if (level.speed > 100) return <Zap className="w-4 h-4 text-yellow-500" />;
-    if (level.speed > 80) return <Shield className="w-4 h-4 text-orange-500" />;
-    return <Shield className="w-4 h-4 text-red-500" />;
-  };
-
-  const getDifficultyText = (level: Level) => {
-    if (level.speed > 150) return "Easy";
-    if (level.speed > 100) return "Medium";
-    if (level.speed > 80) return "Hard";
-    return "Insane";
-  };
+  const completed = new Set(progress.completedLevels);
+  const nextUp = levels.findIndex((level) => !completed.has(level.id));
 
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center p-4 ${
-        nokiaMode
-          ? "bg-gradient-to-br from-green-900 to-black"
-          : "bg-gradient-to-br from-indigo-50 via-white to-cyan-50"
-      }`}
-    >
-      <Card
-        className={`w-full max-w-4xl shadow-2xl border-0 ${
-          nokiaMode
-            ? "bg-green-800/90 backdrop-blur-sm text-green-100"
-            : "bg-white/80 backdrop-blur-sm"
-        }`}
-      >
-        <CardHeader className="text-center pb-6">
-          <CardTitle
-            className={`text-4xl font-bold flex items-center justify-center gap-3 ${
-              nokiaMode
-                ? "text-green-300"
-                : "bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent"
-            }`}
-          >
-            <Gamepad2
-              className={`w-10 h-10 ${nokiaMode ? "text-green-300" : "text-indigo-600"}`}
-            />
-            {nokiaMode ? "Nokia Snake" : "Snake Puzzle"}
-          </CardTitle>
-          <p
-            className={`text-lg ${nokiaMode ? "text-green-200" : "text-slate-600"}`}
-          >
-            {nokiaMode
-              ? "Classic mobile gaming experience"
-              : "Master the art of strategic navigation"}
-          </p>
-          <div className="flex justify-center mt-4">
-            <Button
-              onClick={onToggleNokiaMode}
-              variant={nokiaMode ? "secondary" : "outline"}
-              className={
-                nokiaMode
-                  ? "bg-green-700 text-green-100 hover:bg-green-600"
-                  : ""
-              }
-            >
-              {nokiaMode ? "Modern Mode" : "Nokia Mode"}
+    <div className="w-full space-y-6">
+      <div className="text-center">
+        <h1 className="flex items-center justify-center gap-3 text-4xl font-bold">
+          <Gamepad2 className="h-9 w-9 text-emerald-500" />
+          Snake
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          {completed.size}/{levels.length} levels cleared. Eat enough food to finish each level.
+        </p>
+        <div className="mt-4 flex flex-wrap justify-center gap-2">
+          {nextUp >= 0 && (
+            <Button onClick={() => onSelectLevel(nextUp)}>
+              {completed.size ? `Continue: Level ${levels[nextUp].id}` : "Start playing"}
             </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="text-center">
-            <h3
-              className={`font-semibold text-xl mb-4 ${nokiaMode ? "text-green-200" : "text-slate-700"}`}
-            >
-              Choose Any Level
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
-              {levels.map((level, index) => {
-                const isCompleted = completedLevels.includes(index);
+          )}
+          <Button variant="outline" onClick={onToggleNokiaMode}>
+            {nokiaMode ? "Switch to modern look" : "Switch to Nokia look"}
+          </Button>
+        </div>
+      </div>
 
-                return (
-                  <Button
-                    key={level.id}
-                    onClick={() => onSelectLevel(index)}
-                    variant="outline"
-                    className={`p-4 h-auto transition-all duration-200 hover:scale-[1.02] ${
-                      nokiaMode
-                        ? isCompleted
-                          ? "bg-green-700/50 border-green-400 text-green-100 hover:bg-green-600/50"
-                          : "bg-green-800/30 border-green-600 text-green-200 hover:bg-green-700/30"
-                        : isCompleted
-                          ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 hover:border-green-300"
-                          : "hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-3">
-                        {getDifficultyIcon(level)}
-                        <div className="text-left">
-                          <p
-                            className={`font-semibold ${nokiaMode ? "text-green-100" : "text-slate-800"}`}
-                          >
-                            {level.id}. {level.name}
-                          </p>
-                          <p
-                            className={`text-sm ${nokiaMode ? "text-green-300" : "text-slate-500"}`}
-                          >
-                            {level.description}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <Badge
-                          variant="secondary"
-                          className={
-                            nokiaMode
-                              ? "bg-green-700 text-green-100"
-                              : "bg-slate-100"
-                          }
-                        >
-                          {level.foodTarget} food
-                        </Badge>
-                        <Badge
-                          variant="outline"
-                          className={`text-xs ${nokiaMode ? "border-green-500 text-green-200" : ""}`}
-                        >
-                          {getDifficultyText(level)}
-                        </Badge>
-                        {level.allowWallWrap && (
-                          <Badge
-                            variant="outline"
-                            className={`text-xs ${nokiaMode ? "border-green-400 text-green-300" : "border-blue-300 text-blue-600"}`}
-                          >
-                            Wall Wrap
-                          </Badge>
-                        )}
-                        {isCompleted && (
-                          <Badge
-                            className={
-                              nokiaMode
-                                ? "bg-green-600 text-green-100"
-                                : "bg-green-100 text-green-700 border-green-200"
-                            }
-                          >
-                            ✓ Done
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
-          <div
-            className={`text-center space-y-2 pt-4 border-t ${nokiaMode ? "border-green-700" : "border-slate-200"}`}
-          >
-            <p
-              className={`text-sm font-medium ${nokiaMode ? "text-green-200" : "text-slate-500"}`}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {levels.map((level, index) => {
+          const done = completed.has(level.id);
+          const best = progress.bestScores[level.id];
+          const { text, icon } = difficulty(level);
+          return (
+            <button
+              key={level.id}
+              type="button"
+              onClick={() => onSelectLevel(index)}
+              className={cn(
+                "flex items-start gap-3 rounded-xl border bg-card p-4 text-left text-card-foreground transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                done && "border-green-300 dark:border-green-800"
+              )}
             >
-              Game Controls
-            </p>
-            <div
-              className={`flex justify-center gap-6 text-xs ${nokiaMode ? "text-green-300" : "text-slate-400"}`}
-            >
-              <span>↑↓←→ Move</span>
-              <span>SPACE Pause</span>
-              <span>ESC Menu</span>
-            </div>
-            {nokiaMode && (
-              <p
-                className={`text-xs ${nokiaMode ? "text-green-400" : "text-slate-400"}`}
-              >
-                🎮 Wall Wrap: Snake passes through screen edges like classic
-                Nokia!
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              <div className="mt-0.5">{icon}</div>
+              <div className="min-w-0 flex-1">
+                <p className="flex items-center gap-1.5 font-semibold">
+                  {level.id}. {level.name}
+                  {done && <CheckCircle2 className="h-4 w-4 text-green-500" aria-label="Completed" />}
+                </p>
+                <p className="text-sm text-muted-foreground">{level.description}</p>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  <Badge variant="secondary">{level.foodTarget} food</Badge>
+                  <Badge variant="outline">{text}</Badge>
+                  <Badge variant="outline">{level.allowWallWrap ? "Wrap-around" : "Solid walls"}</Badge>
+                  {best ? <Badge variant="outline">Best {best}</Badge> : null}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="text-center text-xs text-muted-foreground">
+        Arrows / WASD to move · Space to pause · R to restart · Esc for menu · Swipe on touch screens
+      </p>
     </div>
   );
 }

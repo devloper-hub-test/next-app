@@ -5423,6 +5423,13 @@ queue-microtask@^1.2.2:
   resolved "https://registry.yarnpkg.com/queue-microtask/-/queue-microtask-1.2.3.tgz#4929228bbc724dfac43e0efb058caf7b6cfb6243"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
 
+random-words@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/random-words/-/random-words-2.0.1.tgz#cc4564385d040c9fad2b817621a0041a1ecc90f6"
+  integrity sha512-nZNJAmgcFmtJMTDDIUCm/iK4R6RydC6NvALvWhYItXQrgYGk1F7Gww416LpVROFQtfVd5TaLEf4WuSsko03N7w==
+  dependencies:
+    seedrandom "^3.0.5"
+
 react-day-picker@8.10.1:
   version "8.10.1"
   resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-8.10.1.tgz#4762ec298865919b93ec09ba69621580835b8e80"
@@ -5586,6 +5593,11 @@ react-resizable-panels@^2.1.7:
   version "2.1.9"
   resolved "https://registry.yarnpkg.com/react-resizable-panels/-/react-resizable-panels-2.1.9.tgz#874847710f4f122df749b5f08ebe9c72a1e338ca"
   integrity sha512-z77+X08YDIrgAes4jl8xhnUu1LNIRp4+E7cv4xHmLOxxUPO/ML7PSrE813b90vj7xvQ1lcf7g2uA9GeMZonjhQ==
+
+react-simple-keyboard@3.8.282:
+  version "3.8.282"
+  resolved "https://registry.yarnpkg.com/react-simple-keyboard/-/react-simple-keyboard-3.8.282.tgz#a10a9f9a1eaa73f3461f052ff991dcfe8cde8284"
+  integrity sha512-Eoehs2z8xCf/AAwu7q1oPYwF8Y85ff5T/6dbszDm5QBKOu2Bx+h2tCIEPvh/h+mE2Lr6NRnG2nqMrfeyQmpidw==
 
 react-smooth@^4.0.0, react-smooth@^4.0.4:
   version "4.0.4"
@@ -5907,6 +5919,11 @@ scheduler@^0.23.2:
   integrity sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==
   dependencies:
     loose-envify "^1.1.0"
+
+seedrandom@^3.0.5:
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/seedrandom/-/seedrandom-3.0.5.tgz#54edc85c95222525b0c7a6f6b3543d8e0b3aa0a7"
+  integrity sha512-8OwmbklUNzwezjGInmZ+2clQmExQPvomqjL7LFqOYqtmuxRgQYqOD3mHaU+MvZn5FLUeVxVfQjwLZW/n/JFuqg==
 
 "semver@2 || 3 || 4 || 5":
   version "5.7.2"
@@ -6434,6 +6451,11 @@ tweetnacl@^1.0.0, tweetnacl@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-1.0.3.tgz#ac0af71680458d8a6378d0d0d050ab1407d35596"
   integrity sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==
+
+txtgen@3.0.7:
+  version "3.0.7"
+  resolved "https://registry.yarnpkg.com/txtgen/-/txtgen-3.0.7.tgz#81cb16a6f73a21a51f36aca95944bf58631e0678"
+  integrity sha512-1yIREceryZibOmv3CU+rUFTnGJLLSyiB336E9P5+cRru8RLoSAzmm6F6ACkaSoC3uCWykICMKm5GGNlriJxdbA==
 
 type-check@^0.4.0, type-check@~0.4.0:
   version "0.4.0"
