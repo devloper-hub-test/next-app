@@ -18,16 +18,16 @@ export default function Page(): JSX.Element {
         <Header />
         <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-24 lg:pt-28 pb-24 flex flex-col gap-y-16 lg:gap-y-28">
           <HeroSection />
-          <section id="about" className="scroll-mt-24">
+          <section className="scroll-mt-24" id="about">
             <AboutMe />
           </section>
-          <section id="work" className="scroll-mt-24">
+          <section className="scroll-mt-24" id="work">
             <MyWorkSection />
           </section>
-          <section id="mobile" className="scroll-mt-24">
+          <section className="scroll-mt-24" id="mobile">
             <MyTechStackSection />
           </section>
-          <section id="projects" className="scroll-mt-24">
+          <section className="scroll-mt-24" id="projects">
             <Projects />
           </section>
         </main>

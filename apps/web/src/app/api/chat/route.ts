@@ -1,12 +1,13 @@
 // app/api/chat/route.ts
 import { NextResponse } from "next/server";
+import { readBody } from "shadcn-ui/lib/request-body";
 
 const POLLINATIONS_API_URL = "https://text.pollinations.ai";
 
 // Proxy to Pollinations: browser requests (with an Origin header) are
 // rejected with "Missing Turnstile token", server requests are not.
 export async function POST(request: Request): Promise<NextResponse> {
-  const { prompt } = await request.json();
+  const { prompt } = await readBody(request);
 
   if (typeof prompt !== "string" || !prompt.trim()) {
     return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
@@ -19,6 +20,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   const text = await res.text();
 
   if (!res.ok) {
+    // eslint-disable-next-line no-console -- server log for upstream failures
     console.error("Pollinations error:", res.status, text);
     return NextResponse.json({ error: "Upstream error" }, { status: 502 });
   }
