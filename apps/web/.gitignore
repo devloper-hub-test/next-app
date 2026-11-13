@@ -32,3 +32,6 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# chess engine, copied from node_modules by scripts/copy-stockfish.mjs
+/public/stockfish

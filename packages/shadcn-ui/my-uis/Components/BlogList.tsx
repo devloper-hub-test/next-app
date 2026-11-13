@@ -10,7 +10,9 @@ export function BlogList({
   pageParams,
   isPaginated = false,
   heading = "Latest Posts",
+  description,
   basePath = "/blog",
+  activeTag,
 }: BlogListProps) {
   const currentPage = isPaginated ? getPageNumber(pageParams) : 1;
 
@@ -36,7 +38,10 @@ export function BlogList({
       currentPage={currentPage}
       totalPages={totalPages}
       heading={heading}
+      description={description}
       basePath={basePath}
+      tags={tags}
+      activeTag={activeTag}
       disablePagination={!isPaginated}
     />
   );

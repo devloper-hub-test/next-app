@@ -39,3 +39,28 @@
   background: none;
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
 }
+/* Blend Notion-rendered posts into the site theme */
+.blog .notion,
+.blog .notion-app {
+  background: transparent;
+  font-family: inherit;
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+.blog .dark-mode {
+  --bg-color: #000;
+}
+.blog .notion-page {
+  width: 100%;
+  padding: 0;
+}
+.blog .notion-h {
+  scroll-margin-top: 7rem;
+}
+.blog .notion-link {
+  color: #2f8f86;
+  border-bottom-color: rgba(77, 182, 172, 0.4);
+}
+.blog .dark-mode .notion-link {
+  color: #4db6ac;
+}

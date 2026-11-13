@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { CustomizerProvider, PREPAINT_SCRIPT } from "shadcn-ui";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,8 +17,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }): JSX.Element {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html className="scroll-smooth" lang="en" suppressHydrationWarning>
+      <head>
+        {/* Apply the saved theme before paint to avoid a light-mode flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}`,
+          }}
+        />
+        {/* Re-apply the visitor's saved customizations before paint (no flash of the default look) */}
+        <script dangerouslySetInnerHTML={{ __html: PREPAINT_SCRIPT }} />
+      </head>
+      <body className={`${inter.className} antialiased`} suppressHydrationWarning>
+        {/* Visitors' own look-and-feel changes (edited at /customize), saved in their browser only */}
+        <CustomizerProvider>{children}</CustomizerProvider>
+      </body>
     </html>
   );
 }

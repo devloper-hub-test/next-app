@@ -4,12 +4,13 @@ import { Client } from "@notionhq/client";
 import { NotionCompatAPI } from "notion-compat";
 import {
   PageObjectResponse,
+  QueryDatabaseResponse,
   RichTextItemResponse,
 } from "@notionhq/client/build/src/api-endpoints";
 import type { PageInfo, Tag } from "../types/notion";
 
 export const notion = new Client({
-  auth: `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`,
+  auth: process.env.NOTION_TOKEN,
 });
 
 export const notionCustom = new NotionCompatAPI(notion);
@@ -64,7 +65,7 @@ export const getPage = async (pageId: string, allTags?: Tag[]) => {
 
 export async function getTags(): Promise<Tag[]> {
   const response = await notion.databases.query({
-    database_id: "20d8acd0d5d7804db760d919ff3b1779",
+    database_id: process.env.NOTION_TAGS_DB_ID as string,
   });
 
   return response.results.map((page: any) => ({
@@ -76,7 +77,7 @@ export async function getTags(): Promise<Tag[]> {
 
 export async function getPublishedPosts() {
   return notion.databases.query({
-    database_id: "20d8acd0d5d780268883c4bb4b2d9e6b",
+    database_id: process.env.NOTION_POSTS_DB_ID as string,
     // filter: {
     //   property: "Published",
     //   status: { equals: "Done" },
@@ -84,9 +85,12 @@ export async function getPublishedPosts() {
   });
 }
 
-export async function getPageBySlug(slug: string) {
+// Resolves to undefined when no post has this slug
+export async function getPageBySlug(
+  slug: string
+): Promise<QueryDatabaseResponse["results"][number] | undefined> {
   const response = await notion.databases.query({
-    database_id: "20d8acd0d5d780268883c4bb4b2d9e6b",
+    database_id: process.env.NOTION_POSTS_DB_ID as string,
     filter: {
       property: "Slug",
       rich_text: { equals: slug },

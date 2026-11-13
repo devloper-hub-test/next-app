@@ -1,11 +1,14 @@
 import type { ReactNode } from "react";
-import { Header } from "shadcn-ui";
+import { Header, Footer } from "shadcn-ui";
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function Layout({ children }: { children: ReactNode }): JSX.Element {
   return (
-    <div className="flex flex-1 flex-col divide-y divide-dashed divide-border/70 border-border/70 border-dashed sm:border-b dark:divide-border dark:border-border blog">
+    <div className="blog flex min-h-screen flex-col bg-white text-gray-800 dark:bg-black dark:text-gray-200">
       <Header />
-      <div className="mt-12">{children}</div>
+      <main className="flex-1 pt-28 lg:pt-32">{children}</main>
+      <div className="mx-auto w-full max-w-7xl px-4 pb-6 sm:px-6 lg:px-8">
+        <Footer />
+      </div>
     </div>
   );
 }

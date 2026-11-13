@@ -1,35 +1,50 @@
 import { NextResponse } from "next/server";
-import { getGame, updateGame } from "shadcn-ui/lib/game-store";
+import { readBody } from "shadcn-ui/lib/request-body";
+import {
+  emptyBoard,
+  getGame,
+  markForSocket,
+  saveGame,
+} from "shadcn-ui/lib/game-store";
 import { pusherServer } from "shadcn-ui/lib/pusher";
-import type { Board, GameState } from "shadcn-ui/types/game";
+import { gameChannel } from "shadcn-ui/types/game";
 
-// Safely typed initial board
-const initialBoard: Board = Array(9).fill(null) as Board;
-
+// Starts the next round once the current one is finished
 export async function POST(request: Request): Promise<NextResponse> {
-  const body = (await request.json()) as { gameId: string };
+  const body = await readBody(request);
+  const gameId = body.gameId;
+  if (typeof gameId !== "string") {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
 
-  const game: GameState | undefined = getGame(body.gameId);
-
+  const game = getGame(gameId);
   if (!game) {
     return NextResponse.json({ error: "Game not found" }, { status: 404 });
   }
-
-  const updatedGame = updateGame(body.gameId, {
-    board: initialBoard,
-    currentPlayer: "X",
-    winner: null,
-    status: "playing",
-  });
-
-  if (updatedGame) {
-    await pusherServer.trigger(
-      `private-${body.gameId}`,
-      "game-state-update",
-      updatedGame
+  if (!markForSocket(game, body.socketId)) {
+    return NextResponse.json({ error: "You're not in this game" }, { status: 403 });
+  }
+  if (game.state.status !== "finished") {
+    return NextResponse.json(
+      { error: "The current round isn't finished yet" },
+      { status: 400 }
     );
-    return NextResponse.json({ success: true, game: updatedGame });
   }
 
-  return NextResponse.json({ error: "Failed to reset game" }, { status: 500 });
+  // Alternate who goes first each round
+  const startingPlayer = game.state.startingPlayer === "X" ? "O" : "X";
+  game.state = {
+    ...game.state,
+    board: emptyBoard(),
+    startingPlayer,
+    currentPlayer: startingPlayer,
+    winner: null,
+    winningLine: null,
+    status: "playing",
+  };
+  saveGame(gameId, game);
+
+  await pusherServer.trigger(gameChannel(gameId), "game-state-update", game.state);
+
+  return NextResponse.json({ game: game.state });
 }

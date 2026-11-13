@@ -16,13 +16,14 @@ import {
 import { BlogList } from "shadcn-ui/my-uis/Components/BlogList";
 import { BlogPost } from "shadcn-ui/my-uis/Components/BlogPost";
 import type { NotionPage } from "shadcn-ui/types/notion";
+import { notFound } from "next/navigation";
 
 // export { generateBlogStaticParams as generateStaticParams };
 
 // Main page component
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
-}) {
+}): Promise<JSX.Element> {
   const params = await props.params;
   const { slug = [] } = params;
 
@@ -35,14 +36,10 @@ export default async function Page(props: {
   // Handle blog post page
   if (isBlogPostPage(pageParams)) {
     const postSlug = getPostSlug(pageParams);
-    if (!postSlug) {
-      return <div className="max-w-3xl mx-auto p-4">Invalid post URL</div>;
-    }
+    if (!postSlug) notFound();
 
     const post = await getPageBySlug(postSlug);
-    // if (!post) {
-    //   return <div className="max-w-3xl mx-auto p-4">Post not found</div>;
-    // }
+    if (!post) notFound();
 
     const recordMap = await getPage(post.id, tags);
     return <BlogPost recordMap={recordMap} />;
@@ -51,14 +48,10 @@ export default async function Page(props: {
   // Handle tag pages (both paginated and non-paginated)
   if (isTagPage(pageParams) || isPaginatedTagPage(pageParams)) {
     const tagSlug = getTagSlug(pageParams);
-    if (!tagSlug) {
-      return <div className="max-w-3xl mx-auto p-4">Invalid tag URL</div>;
-    }
+    if (!tagSlug) notFound();
 
     const tag = tags.find((t) => t.value === tagSlug);
-    if (!tag) {
-      return <div className="max-w-3xl mx-auto p-4">Tag not found</div>;
-    }
+    if (!tag) notFound();
 
     const taggedPosts = posts.filter((post) => {
       const postTags = post.properties.Tags?.relation || [];
@@ -67,12 +60,14 @@ export default async function Page(props: {
 
     return (
       <BlogList
+        activeTag={tag.value}
+        basePath={`/blog/tag/${tag.value}`}
+        description={`${taggedPosts.length} ${taggedPosts.length === 1 ? "post" : "posts"} tagged with ${tag.label}`}
+        heading={tag.label}
+        isPaginated
+        pageParams={pageParams}
         posts={taggedPosts}
         tags={tags}
-        pageParams={pageParams}
-        isPaginated={true}
-        heading={`Posts tagged with: ${tag.label}`}
-        basePath={`/blog/tag/${tag.value}`}
       />
     );
   }
@@ -80,21 +75,15 @@ export default async function Page(props: {
   if (isBlogRootPage(pageParams) || isPaginatedBlogPage(pageParams)) {
     return (
       <BlogList
+        basePath="/blog"
+        heading="Latest Posts"
+        isPaginated
+        pageParams={pageParams}
         posts={posts}
         tags={tags}
-        pageParams={pageParams}
-        isPaginated={true}
-        heading="Latest Posts"
-        basePath="/blog"
       />
     );
   }
 
-  // 404 - Not Found
-  return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">404 - Page Not Found</h1>
-      <p className="text-gray-600">The requested page could not be found.</p>
-    </div>
-  );
+  notFound();
 }
