@@ -167,7 +167,7 @@ Request bodies are read with `readBody()` (`packages/shadcn-ui/lib/request-body.
 1. Set the environment variables from the table above in your hosting dashboard.
 2. Build with `yarn build`. This also copies the chess engine into `public/`.
 
-**Important for online games:** game rooms are kept **in server memory**. That works for `next dev` or a single always-on Node server, but on serverless hosting (like Vercel) requests can hit different instances and games can disappear. For production, move the stores in `lib/game-store.ts` and `lib/chess-store.ts` to a shared store such as Redis (for example Upstash's free tier).
+**Important for online games:** game rooms are stored through `lib/kv-store.ts`. If `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` (or Vercel's `KV_REST_API_URL` / `KV_REST_API_TOKEN`) are set, rooms are saved in Upstash Redis and shared by every server. Otherwise they stay in server memory, which is fine for `yarn dev` but **breaks on Vercel**: "create" and "join" can run on different instances, and the joiner gets "Game not found". Add a free Upstash database in production.
 
 ## Tech stack
 

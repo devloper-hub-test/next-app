@@ -2,33 +2,21 @@
 import { Chess } from "chess.js";
 import type { ChessResult, Color, OnlineChessState, Seat } from "../types/chess";
 import { colorOfSeat } from "../types/chess";
+import { createKvStore } from "./kv-store";
 
 interface StoredChessGame {
   state: OnlineChessState;
   sockets: Record<Seat, string | null>; // Pusher socket id of each player
-  updatedAt: number;
 }
 
-// In-memory store, NOT FOR PRODUCTION (same caveats as lib/game-store.ts).
-const globalForChess = globalThis as typeof globalThis & {
-  chessGames?: Map<string, StoredChessGame>;
-};
-const games = (globalForChess.chessGames ??= new Map());
+// Shared Redis store in production, in-memory locally (see lib/kv-store.ts)
+const games = createKvStore<StoredChessGame>("chess", 6 * 60 * 60);
 
-const GAME_TTL_MS = 6 * 60 * 60 * 1000;
 const START_FEN = new Chess().fen();
 
-const pruneStaleGames = () => {
-  const now = Date.now();
-  games.forEach((game, id) => {
-    if (now - game.updatedAt > GAME_TTL_MS) games.delete(id);
-  });
-};
+export const getChessGame = (gameId: string): Promise<StoredChessGame | undefined> => games.get(gameId);
 
-export const getChessGame = (gameId: string): StoredChessGame | undefined => games.get(gameId);
-
-export const createChessGame = (gameId: string, socketId: string, hostColor: Color) => {
-  pruneStaleGames();
+export const createChessGame = async (gameId: string, socketId: string, hostColor: Color) => {
   const game: StoredChessGame = {
     state: {
       fen: START_FEN,
@@ -41,21 +29,17 @@ export const createChessGame = (gameId: string, socketId: string, hostColor: Col
       score: { host: 0, guest: 0, draws: 0 },
     },
     sockets: { host: socketId, guest: null },
-    updatedAt: Date.now(),
   };
-  games.set(gameId, game);
+  await games.set(gameId, game);
   return game;
 };
 
-export const saveChessGame = (gameId: string, game: StoredChessGame) => {
-  game.updatedAt = Date.now();
-  games.set(gameId, game);
+export const saveChessGame = async (gameId: string, game: StoredChessGame) => {
+  await games.set(gameId, game);
   return game;
 };
 
-export const deleteChessGame = (gameId: string) => {
-  games.delete(gameId);
-};
+export const deleteChessGame = (gameId: string): Promise<void> => games.delete(gameId);
 
 export const seatForSocket = (game: StoredChessGame, socketId: unknown): Seat | null => {
   if (typeof socketId !== "string" || !socketId) return null;

@@ -12,7 +12,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const game = getGame(gameId);
+  const game = await getGame(gameId);
   if (!game) {
     return NextResponse.json({ error: "Game not found" }, { status: 404 });
   }
@@ -34,7 +34,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   game.sockets[playerSymbol] = socketId;
   game.state.players[playerSymbol] = true;
   game.state.status = "playing";
-  saveGame(gameId, game);
+  await saveGame(gameId, game);
 
   await broadcast(gameChannel(gameId), "game-state-update", game.state);
 

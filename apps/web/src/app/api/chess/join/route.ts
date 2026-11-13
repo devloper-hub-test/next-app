@@ -12,7 +12,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const game = getChessGame(gameId);
+  const game = await getChessGame(gameId);
   if (!game) {
     return NextResponse.json({ error: "Game not found" }, { status: 404 });
   }
@@ -29,7 +29,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   game.sockets[seat] = socketId;
   // A new opponent always starts from a fresh board
   game.state = resetBoard({ ...game.state, players: { ...game.state.players, [seat]: true } });
-  saveChessGame(gameId, game);
+  await saveChessGame(gameId, game);
 
   await broadcast(chessChannel(gameId), "game-state-update", game.state);
 

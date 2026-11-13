@@ -12,7 +12,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const game = getChessGame(gameId);
+  const game = await getChessGame(gameId);
   if (!game || !seatForSocket(game, body.socketId)) {
     return NextResponse.json({ error: "You're not in this game" }, { status: 403 });
   }
@@ -24,7 +24,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   game.state = resetBoard(game.state, otherColor(game.state.hostColor));
-  saveChessGame(gameId, game);
+  await saveChessGame(gameId, game);
 
   await broadcast(chessChannel(gameId), "game-state-update", game.state);
 

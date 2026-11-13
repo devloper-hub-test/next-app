@@ -21,7 +21,11 @@
         "PUSHER_APP_ID",
         "PUSHER_SECRET",
         "NEXT_PUBLIC_PUSHER_KEY",
-        "NEXT_PUBLIC_PUSHER_CLUSTER"
+        "NEXT_PUBLIC_PUSHER_CLUSTER",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "KV_REST_API_URL",
+        "KV_REST_API_TOKEN"
       ]
     },
     "web#dev": {
@@ -40,7 +44,11 @@
         "PUSHER_APP_ID",
         "PUSHER_SECRET",
         "NEXT_PUBLIC_PUSHER_KEY",
-        "NEXT_PUBLIC_PUSHER_CLUSTER"
+        "NEXT_PUBLIC_PUSHER_CLUSTER",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "KV_REST_API_URL",
+        "KV_REST_API_TOKEN"
       ]
     },
     "lint": {},

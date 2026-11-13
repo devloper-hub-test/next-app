@@ -1,36 +1,20 @@
 // lib/game-store.ts
 import type { Board, GameState, Mark } from "../types/game";
+import { createKvStore } from "./kv-store";
 
 interface StoredGame {
   state: GameState;
   sockets: Record<Mark, string | null>; // Pusher socket id of each player
-  updatedAt: number;
 }
 
-// In-memory store, NOT FOR PRODUCTION: games are lost on restart, and serverless
-// hosts (e.g. Vercel) run routes in separate instances. Use Redis or a database there.
-// Kept on globalThis so every route handler shares one store and it survives dev reloads.
-const globalForGames = globalThis as typeof globalThis & {
-  ticTacToeGames?: Map<string, StoredGame>;
-};
-const games = (globalForGames.ticTacToeGames ??= new Map());
-
-const GAME_TTL_MS = 2 * 60 * 60 * 1000;
-
-const pruneStaleGames = () => {
-  const now = Date.now();
-  games.forEach((game, id) => {
-    if (now - game.updatedAt > GAME_TTL_MS) games.delete(id);
-  });
-};
+// Shared Redis store in production, in-memory locally (see lib/kv-store.ts)
+const games = createKvStore<StoredGame>("ttt", 2 * 60 * 60);
 
 export const emptyBoard = (): Board => Array(9).fill(null);
 
-export const getGame = (gameId: string): StoredGame | undefined =>
-  games.get(gameId);
+export const getGame = (gameId: string): Promise<StoredGame | undefined> => games.get(gameId);
 
-export const createGame = (gameId: string, socketId: string): StoredGame => {
-  pruneStaleGames();
+export const createGame = async (gameId: string, socketId: string): Promise<StoredGame> => {
   const game: StoredGame = {
     state: {
       board: emptyBoard(),
@@ -43,21 +27,17 @@ export const createGame = (gameId: string, socketId: string): StoredGame => {
       status: "waiting",
     },
     sockets: { X: socketId, O: null },
-    updatedAt: Date.now(),
   };
-  games.set(gameId, game);
+  await games.set(gameId, game);
   return game;
 };
 
-export const saveGame = (gameId: string, game: StoredGame): StoredGame => {
-  game.updatedAt = Date.now();
-  games.set(gameId, game);
+export const saveGame = async (gameId: string, game: StoredGame): Promise<StoredGame> => {
+  await games.set(gameId, game);
   return game;
 };
 
-export const deleteGame = (gameId: string) => {
-  games.delete(gameId);
-};
+export const deleteGame = (gameId: string): Promise<void> => games.delete(gameId);
 
 export const markForSocket = (game: StoredGame, socketId: unknown): Mark | null => {
   if (typeof socketId !== "string" || !socketId) return null;

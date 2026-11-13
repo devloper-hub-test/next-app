@@ -14,10 +14,11 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   let gameId = newGameId();
-  while (getGame(gameId)) {
+  // eslint-disable-next-line no-await-in-loop -- retry until we find an unused code (collisions are rare)
+  while (await getGame(gameId)) {
     gameId = newGameId();
   }
-  const game = createGame(gameId, socketId);
+  const game = await createGame(gameId, socketId);
 
   return NextResponse.json({ gameId, playerSymbol: "X", game: game.state });
 }

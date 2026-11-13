@@ -18,7 +18,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const game = getChessGame(gameId);
+  const game = await getChessGame(gameId);
   if (!game) {
     return NextResponse.json({ error: "Game not found" }, { status: 404 });
   }
@@ -51,7 +51,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   };
   const result = gameResult(chess);
   if (result) game.state = finishGame(game.state, result);
-  saveChessGame(gameId, game);
+  await saveChessGame(gameId, game);
 
   await broadcast(chessChannel(gameId), "game-state-update", game.state);
 

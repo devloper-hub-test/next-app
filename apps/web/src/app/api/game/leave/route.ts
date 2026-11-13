@@ -18,7 +18,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const game = getGame(gameId);
+  const game = await getGame(gameId);
   const mark = game && markForSocket(game, body.socketId);
   if (!game || !mark) {
     return NextResponse.json({ success: true });
@@ -26,7 +26,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   game.sockets[mark] = null;
   if (!game.sockets.X && !game.sockets.O) {
-    deleteGame(gameId);
+    await deleteGame(gameId);
     return NextResponse.json({ success: true });
   }
 
@@ -40,7 +40,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     winningLine: null,
     status: "waiting",
   };
-  saveGame(gameId, game);
+  await saveGame(gameId, game);
 
   await broadcast(gameChannel(gameId), "opponent-left", {});
   await broadcast(gameChannel(gameId), "game-state-update", game.state);

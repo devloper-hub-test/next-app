@@ -7,15 +7,15 @@ import { gameChannel } from "shadcn-ui/types/game";
 import { chessChannel } from "shadcn-ui/types/chess";
 
 // Only the players of a game may subscribe to its private channel
-const isPlayer = (channelName: string, socketId: string): boolean => {
+const isPlayer = async (channelName: string, socketId: string): Promise<boolean> => {
   const ticTacToePrefix = gameChannel("");
   const chessPrefix = chessChannel("");
   if (channelName.startsWith(ticTacToePrefix)) {
-    const game = getGame(channelName.slice(ticTacToePrefix.length));
+    const game = await getGame(channelName.slice(ticTacToePrefix.length));
     return Boolean(game && markForSocket(game, socketId));
   }
   if (channelName.startsWith(chessPrefix)) {
-    const game = getChessGame(channelName.slice(chessPrefix.length));
+    const game = await getChessGame(channelName.slice(chessPrefix.length));
     return Boolean(game && seatForSocket(game, socketId));
   }
   return false;
@@ -26,7 +26,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   const socketId = params.get("socket_id");
   const channelName = params.get("channel_name");
 
-  if (!socketId || !channelName || !isPlayer(channelName, socketId)) {
+  if (!socketId || !channelName || !(await isPlayer(channelName, socketId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

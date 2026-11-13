@@ -16,12 +16,13 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   let gameId = newGameId();
-  while (getChessGame(gameId)) {
+  // eslint-disable-next-line no-await-in-loop -- retry until we find an unused code (collisions are rare)
+  while (await getChessGame(gameId)) {
     gameId = newGameId();
   }
   const randomColor: Color = Math.random() < 0.5 ? "w" : "b";
   const hostColor: Color = choice === "random" ? randomColor : choice;
-  const game = createChessGame(gameId, socketId, hostColor);
+  const game = await createChessGame(gameId, socketId, hostColor);
 
   return NextResponse.json({ gameId, seat: "host", game: game.state });
 }
