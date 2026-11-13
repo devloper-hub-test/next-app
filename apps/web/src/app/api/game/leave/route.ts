@@ -7,7 +7,7 @@ import {
   markForSocket,
   saveGame,
 } from "shadcn-ui/lib/game-store";
-import { pusherServer } from "shadcn-ui/lib/pusher";
+import { broadcast } from "shadcn-ui/lib/pusher";
 import { gameChannel } from "shadcn-ui/types/game";
 
 // Called when a player clicks "Leave" or closes the tab (via navigator.sendBeacon)
@@ -42,8 +42,8 @@ export async function POST(request: Request): Promise<NextResponse> {
   };
   saveGame(gameId, game);
 
-  await pusherServer.trigger(gameChannel(gameId), "opponent-left", {});
-  await pusherServer.trigger(gameChannel(gameId), "game-state-update", game.state);
+  await broadcast(gameChannel(gameId), "opponent-left", {});
+  await broadcast(gameChannel(gameId), "game-state-update", game.state);
 
   return NextResponse.json({ success: true });
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { readBody } from "shadcn-ui/lib/request-body";
 import { getChessGame, resetBoard, saveChessGame, seatForSocket } from "shadcn-ui/lib/chess-store";
-import { pusherServer } from "shadcn-ui/lib/pusher";
+import { broadcast } from "shadcn-ui/lib/pusher";
 import { chessChannel, otherColor } from "shadcn-ui/types/chess";
 
 // Starts a new game once the current one is over; players swap colours
@@ -26,7 +26,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   game.state = resetBoard(game.state, otherColor(game.state.hostColor));
   saveChessGame(gameId, game);
 
-  await pusherServer.trigger(chessChannel(gameId), "game-state-update", game.state);
+  await broadcast(chessChannel(gameId), "game-state-update", game.state);
 
   return NextResponse.json({ game: game.state });
 }

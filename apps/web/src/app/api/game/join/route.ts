@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { readBody } from "shadcn-ui/lib/request-body";
 import { getGame, markForSocket, saveGame } from "shadcn-ui/lib/game-store";
-import { pusherServer } from "shadcn-ui/lib/pusher";
+import { broadcast } from "shadcn-ui/lib/pusher";
 import { gameChannel, type Mark } from "shadcn-ui/types/game";
 
 export async function POST(request: Request): Promise<NextResponse> {
@@ -36,7 +36,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   game.state.status = "playing";
   saveGame(gameId, game);
 
-  await pusherServer.trigger(gameChannel(gameId), "game-state-update", game.state);
+  await broadcast(gameChannel(gameId), "game-state-update", game.state);
 
   return NextResponse.json({ gameId, playerSymbol, game: game.state });
 }

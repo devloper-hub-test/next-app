@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { readBody } from "shadcn-ui/lib/request-body";
 import { getChessGame, resetBoard, saveChessGame, seatForSocket } from "shadcn-ui/lib/chess-store";
-import { pusherServer } from "shadcn-ui/lib/pusher";
+import { broadcast } from "shadcn-ui/lib/pusher";
 import { chessChannel, type Seat } from "shadcn-ui/types/chess";
 
 export async function POST(request: Request): Promise<NextResponse> {
@@ -31,7 +31,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   game.state = resetBoard({ ...game.state, players: { ...game.state.players, [seat]: true } });
   saveChessGame(gameId, game);
 
-  await pusherServer.trigger(chessChannel(gameId), "game-state-update", game.state);
+  await broadcast(chessChannel(gameId), "game-state-update", game.state);
 
   return NextResponse.json({ gameId, seat, game: game.state });
 }

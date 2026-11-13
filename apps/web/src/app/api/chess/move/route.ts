@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { readBody } from "shadcn-ui/lib/request-body";
 import { finishGame, getChessGame, saveChessGame, seatForSocket } from "shadcn-ui/lib/chess-store";
 import { gameResult, replay } from "shadcn-ui/lib/chess-rules";
-import { pusherServer } from "shadcn-ui/lib/pusher";
+import { broadcast } from "shadcn-ui/lib/pusher";
 import { chessChannel, colorOfSeat } from "shadcn-ui/types/chess";
 
 const SQUARE = /^[a-h][1-8]$/;
@@ -53,7 +53,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   if (result) game.state = finishGame(game.state, result);
   saveChessGame(gameId, game);
 
-  await pusherServer.trigger(chessChannel(gameId), "game-state-update", game.state);
+  await broadcast(chessChannel(gameId), "game-state-update", game.state);
 
   return NextResponse.json({ game: game.state });
 }

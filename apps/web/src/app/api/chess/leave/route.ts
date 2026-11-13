@@ -7,7 +7,7 @@ import {
   saveChessGame,
   seatForSocket,
 } from "shadcn-ui/lib/chess-store";
-import { pusherServer } from "shadcn-ui/lib/pusher";
+import { broadcast } from "shadcn-ui/lib/pusher";
 import { chessChannel, colorOfSeat, otherColor } from "shadcn-ui/types/chess";
 
 // Called when a player clicks "Leave" or closes the tab (via navigator.sendBeacon)
@@ -38,8 +38,8 @@ export async function POST(request: Request): Promise<NextResponse> {
   game.state = { ...game.state, players: { ...game.state.players, [seat]: false } };
   saveChessGame(gameId, game);
 
-  await pusherServer.trigger(chessChannel(gameId), "opponent-left", {});
-  await pusherServer.trigger(chessChannel(gameId), "game-state-update", game.state);
+  await broadcast(chessChannel(gameId), "opponent-left", {});
+  await broadcast(chessChannel(gameId), "game-state-update", game.state);
 
   return NextResponse.json({ success: true });
 }
