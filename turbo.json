@@ -2,16 +2,46 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "!.next/cache/**"
+      ],
+      "env": [
+        "NOTION_TOKEN",
+        "NOTION_POSTS_DB_ID",
+        "NOTION_TAGS_DB_ID",
+        "PUSHER_APP_ID",
+        "PUSHER_SECRET",
+        "NEXT_PUBLIC_PUSHER_KEY",
+        "NEXT_PUBLIC_PUSHER_CLUSTER"
+      ]
     },
     "web#dev": {
       "cache": false
     },
     "web#build": {
       "cache": false,
-      "outputs": ["dist/**", ".next/**"]
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ],
+      "env": [
+        "NOTION_TOKEN",
+        "NOTION_POSTS_DB_ID",
+        "NOTION_TAGS_DB_ID",
+        "PUSHER_APP_ID",
+        "PUSHER_SECRET",
+        "NEXT_PUBLIC_PUSHER_KEY",
+        "NEXT_PUBLIC_PUSHER_CLUSTER"
+      ]
     },
     "lint": {},
     "type-check": {},
