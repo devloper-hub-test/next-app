@@ -3,13 +3,16 @@ import { NextResponse } from "next/server";
 import { pusherServer } from "shadcn-ui/lib/pusher";
 import { getGame, markForSocket } from "shadcn-ui/lib/game-store";
 import { getChessGame, seatForSocket } from "shadcn-ui/lib/chess-store";
+import { colorForSocket, getLudoGame } from "shadcn-ui/lib/ludo-store";
 import { gameChannel } from "shadcn-ui/types/game";
 import { chessChannel } from "shadcn-ui/types/chess";
+import { ludoChannel } from "shadcn-ui/types/ludo";
 
 // Only the players of a game may subscribe to its private channel
 const isPlayer = async (channelName: string, socketId: string): Promise<boolean> => {
   const ticTacToePrefix = gameChannel("");
   const chessPrefix = chessChannel("");
+  const ludoPrefix = ludoChannel("");
   if (channelName.startsWith(ticTacToePrefix)) {
     const game = await getGame(channelName.slice(ticTacToePrefix.length));
     return Boolean(game && markForSocket(game, socketId));
@@ -17,6 +20,10 @@ const isPlayer = async (channelName: string, socketId: string): Promise<boolean>
   if (channelName.startsWith(chessPrefix)) {
     const game = await getChessGame(channelName.slice(chessPrefix.length));
     return Boolean(game && seatForSocket(game, socketId));
+  }
+  if (channelName.startsWith(ludoPrefix)) {
+    const game = await getLudoGame(channelName.slice(ludoPrefix.length));
+    return Boolean(game && colorForSocket(game, socketId));
   }
   return false;
 };

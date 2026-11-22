@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Header } from "shadcn-ui";
-import { ChessArt, SnakeArt, TicTacToeArt } from "./_components/game-art";
+import { ChessArt, LudoArt, SnakeArt, TicTacToeArt } from "./_components/game-art";
 import { GameProgress } from "./_components/game-progress";
 
 interface Game {
@@ -12,21 +12,35 @@ interface Game {
   art: JSX.Element;
   artBackground: string;
   badge?: string;
-  progress?: "chess" | "snake";
+  progress?: "chess" | "snake" | "ludo";
 }
 
-const FEATURED: Game = {
-  href: "/games/chess",
-  title: "Chess",
-  tagline: "Outsmart the bots, or your best friend.",
-  description:
-    "Face four bot opponents, from the clumsy Pawn Pusher to The Grandmaster, or send a friend a code and battle it out live.",
-  chips: ["🤖 4 bot levels", "👥 2 players online", "💡 Hints & undo"],
-  art: <ChessArt />,
-  artBackground: "bg-emerald-800",
-  badge: "New",
-  progress: "chess",
-};
+const FEATURED: Game[] = [
+  {
+    href: "/games/chess",
+    title: "Chess",
+    tagline: "Outsmart the bots, or your best friend.",
+    description:
+      "Face four bot opponents, from the clumsy Pawn Pusher to The Grandmaster, or send a friend a code and battle it out live.",
+    chips: ["🤖 4 bot levels", "👥 2 players online", "💡 Hints & undo"],
+    art: <ChessArt />,
+    artBackground: "bg-emerald-800",
+    badge: "New",
+    progress: "chess",
+  },
+  {
+    href: "/games/ludo",
+    title: "Ludo",
+    tagline: "Roll, race, capture. Repeat.",
+    description:
+      "Race your four tokens home against up to five bots, or open a table and play live with up to six friends on the big hexagon board.",
+    chips: ["🤖 3 bot levels", "👥 2–6 players online", "🎲 Fair server rolls"],
+    art: <LudoArt />,
+    artBackground: "bg-gradient-to-br from-amber-400 to-rose-500",
+    badge: "New",
+    progress: "ludo",
+  },
+];
 
 const GAMES: Game[] = [
   {
@@ -147,7 +161,9 @@ export default function GamesPage(): JSX.Element {
         </section>
 
         <div className="mt-12 grid gap-6">
-          <FeaturedCard game={FEATURED} />
+          {FEATURED.map((game) => (
+            <FeaturedCard game={game} key={game.href} />
+          ))}
           <div className="grid gap-6 sm:grid-cols-2">
             {GAMES.map((game) => (
               <GameCard game={game} key={game.href} />

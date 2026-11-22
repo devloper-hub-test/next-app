@@ -90,3 +90,40 @@ export function TicTacToeArt(): JSX.Element {
     </svg>
   );
 }
+
+export function LudoArt(): JSX.Element {
+  const pips = [
+    [-9, -9],
+    [9, -9],
+    [0, 0],
+    [-9, 9],
+    [9, 9],
+  ];
+  const token = (cx: number, cy: number, fill: string): JSX.Element => (
+    <g>
+      <circle cx={cx} cy={cy + 3} fill="#000" opacity={0.2} r={13} />
+      <circle cx={cx} cy={cy} fill={fill} r={13} stroke="#fff" strokeWidth={3} />
+      <circle cx={cx} cy={cy} fill="#fff" opacity={0.8} r={5} />
+    </g>
+  );
+  // A 2×2 board of base colours with a die tumbling over it
+  return (
+    <svg aria-hidden className="h-full w-full" preserveAspectRatio="xMidYMid meet" viewBox="0 0 240 140">
+      <g opacity={0.9} stroke="#fff" strokeWidth={3}>
+        <rect fill="#ef4444" height={50} rx={8} width={50} x={65} y={18} />
+        <rect fill="#22c55e" height={50} rx={8} width={50} x={125} y={18} />
+        <rect fill="#3b82f6" height={50} rx={8} width={50} x={65} y={74} />
+        <rect fill="#eab308" height={50} rx={8} width={50} x={125} y={74} />
+      </g>
+      {token(42, 104, "#ef4444")}
+      {token(198, 38, "#3b82f6")}
+      <g transform="translate(120 71) rotate(-14)">
+        <rect fill="#000" height={44} opacity={0.2} rx={9} width={44} x={-20} y={-18} />
+        <rect fill="#fff" height={44} rx={9} stroke="#111827" strokeWidth={2} width={44} x={-22} y={-22} />
+        {pips.map(([x, y]) => (
+          <circle cx={x} cy={y} fill="#111827" key={`${x}-${y}`} r={4} />
+        ))}
+      </g>
+    </svg>
+  );
+}

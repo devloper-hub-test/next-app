@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type ProgressSource = "chess" | "snake";
+type ProgressSource = "chess" | "snake" | "ludo";
 
 const readJson = <T,>(key: string): T | null => {
   try {
@@ -22,6 +22,12 @@ const describe: Record<ProgressSource, () => string | null> = {
   },
   chess: () => {
     const records = readJson<Record<string, { wins?: number }>>("chess-records");
+    const wins = Object.values(records ?? {}).reduce((sum, r) => sum + (r.wins ?? 0), 0);
+    if (!wins) return null;
+    return `${wins} ${wins === 1 ? "win" : "wins"} vs the bots`;
+  },
+  ludo: () => {
+    const records = readJson<Record<string, { wins?: number }>>("ludo-records");
     const wins = Object.values(records ?? {}).reduce((sum, r) => sum + (r.wins ?? 0), 0);
     if (!wins) return null;
     return `${wins} ${wins === 1 ? "win" : "wins"} vs the bots`;
